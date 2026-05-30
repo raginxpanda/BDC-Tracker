@@ -664,7 +664,7 @@ const BDC_DATA = {
       "start": "05/29/2015",
       "projectedEnd": "06/30/2026",
       "patch": "4.8",
-      "theme": "REP"
+      "theme": "Reputation Grind "
     },
     "standbyInfo": {
       "lastCampaign": "—",
@@ -884,31 +884,10 @@ const BDC_DATA = {
     },
     {
       "rank": "CRM",
-      "handle": "PandemicVapor",
-      "stars": 0,
-      "quals": 0,
-      "status": "active",
-      "affiliate": false,
-      "memberSince": "2020",
-      "promotionHistory": [
-        {
-          "date": "May 2026",
-          "from": "Lieutenant",
-          "to": "Crewman",
-          "note": "System launch reset — re-earning rank under new criteria."
-        }
-      ],
-      "divisions": [],
-      "qualsList": [],
-      "badges": [],
-      "campaignsAttended": []
-    },
-    {
-      "rank": "CRM",
       "handle": "Raylenn",
       "stars": 0,
       "quals": 0,
-      "status": "active",
+      "status": "standby",
       "affiliate": true,
       "memberSince": "2021",
       "promotionHistory": [
@@ -926,11 +905,32 @@ const BDC_DATA = {
     },
     {
       "rank": "CRM",
+      "handle": "PandemicVapor",
+      "stars": 0,
+      "quals": 0,
+      "status": "standby",
+      "affiliate": false,
+      "memberSince": "2020",
+      "promotionHistory": [
+        {
+          "date": "May 2026",
+          "from": "Lieutenant",
+          "to": "Crewman",
+          "note": "System launch reset — re-earning rank under new criteria."
+        }
+      ],
+      "divisions": [],
+      "qualsList": [],
+      "badges": [],
+      "campaignsAttended": []
+    },
+    {
+      "rank": "CRM",
       "handle": "ice34",
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true,
+      "affiliate": false,
       "memberSince": "2021"
     },
     {
@@ -1020,7 +1020,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true
+      "affiliate": false
     },
     {
       "rank": "CRM",
@@ -1036,7 +1036,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true
+      "affiliate": false
     },
     {
       "rank": "CRM",
@@ -1092,7 +1092,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true
+      "affiliate": false
     },
     {
       "rank": "CRM",
@@ -1100,7 +1100,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true
+      "affiliate": false
     },
     {
       "rank": "CRM",
@@ -1116,7 +1116,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": true
+      "affiliate": false
     },
     {
       "rank": "CRM",
@@ -1458,8 +1458,7 @@ const BDC_DATA = {
   "honors": {
     "foundersMark": [
       "RaginXPanda",
-      "BDC_Narwhal_OG",
-      "SaintLoneStar"
+      "BDC_Narwhal_OG"
     ],
     "campaignVeterans": [],
     "standardBearers": [],
@@ -1481,6 +1480,81 @@ const BDC_DATA = {
     }
   ]
 };
+
+
+/* ============================================================
+   ░░  LIVE SNAPSHOT INTEGRATION
+   ░░
+   ░░  Pulls authoritative org data from the Carbon-12 bot at
+   ░░  api.blkdiamondcorporation.com and merges it into BDC_DATA
+   ░░  before the page renders. On fetch failure, the static
+   ░░  data above is used unchanged.
+   ░░
+   ░░  What the bot now owns (will override the static values):
+   ░░    • Active campaign  ← /campaign start | end in the bot
+   ░░    • Roster (verified members + ranks + history)
+   ░░  What stays static (bot doesn't track these):
+   ░░    • Campaign projectedEnd, patch label
+   ░░    • Standby info, campaigns log, honors definitions
+   ============================================================ */
+
+const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
+
+(async function loadLiveSnapshot() {
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d)) return '—';
+    return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+  }
+
+  try {
+    const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const live = await res.json();
+
+    // === Campaign — bot is the source of truth ===
+    // If the bot has an active campaign, override the static one but
+    // preserve fields the bot doesn't track (projectedEnd, patch).
+    // If the bot has no active campaign, flip the banner to standby.
+    if (live.currentCampaign) {
+      const staticFields = BDC_DATA.mode.currentCampaign || {};
+      BDC_DATA.mode.state = 'active';
+      BDC_DATA.mode.currentCampaign = {
+        name: live.currentCampaign.name,
+        start: fmtDate(live.currentCampaign.startedAt),
+        projectedEnd: staticFields.projectedEnd || '—',
+        patch: staticFields.patch || '—',
+        theme: live.currentCampaign.notes || staticFields.theme || '—',
+      };
+    } else {
+      BDC_DATA.mode.state = 'standby';
+    }
+
+    // === Roster — replace with snapshot, minus members already in
+    // the rich Command card section so they don't appear twice.
+    if (Array.isArray(live.roster) && live.roster.length) {
+      const commandHandles = new Set(
+        (BDC_DATA.command ?? []).map((c) => (c.handle ?? '').toLowerCase()),
+      );
+      BDC_DATA.roster = live.roster.filter(
+        (m) => !commandHandles.has((m.handle ?? '').toLowerCase()),
+      );
+    }
+
+    if (live.lastUpdated) BDC_DATA.lastUpdated = live.lastUpdated;
+
+    // If DOM finished loading before the fetch completed, re-render
+    // the affected sections so the new data lands on screen.
+    if (document.readyState !== 'loading') {
+      if (typeof renderStatusBanner === 'function') renderStatusBanner();
+      if (typeof renderRoster === 'function') renderRoster();
+      if (typeof renderFooter === 'function') renderFooter();
+    }
+  } catch (err) {
+    console.warn('[tracker] live snapshot fetch failed, using static data:', err);
+  }
+})();
 
 
 /* ============================================================
