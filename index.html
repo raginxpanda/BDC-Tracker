@@ -109,7 +109,10 @@
         .lb-position.top-three { color: var(--bdc-blue); }
         .rank-badge { display: inline-block; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 2px; white-space: nowrap; border: 1px solid; }
         .rank-FA { color: var(--rank-fadm); border-color: var(--rank-fadm); background: rgba(232, 232, 240, 0.08); }
+<<<<<<< HEAD
         .rank-FADM { color: var(--rank-fadm); border-color: var(--rank-fadm); background: rgba(232, 232, 240, 0.08); }
+=======
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
         .rank-ADM { color: var(--rank-adm); border-color: var(--rank-adm); background: rgba(0, 172, 238, 0.1); }
         .rank-CPT { color: var(--rank-cpt); border-color: var(--rank-cpt); background: rgba(178, 34, 34, 0.1); }
         .rank-LT { color: var(--rank-lt); border-color: var(--rank-lt); background: rgba(70, 130, 180, 0.1); }
@@ -205,13 +208,29 @@
     <div class="container">
         <!-- HERO -->
         <header class="hero">
+<<<<<<< HEAD
             <img class="bdc-logo" src="bdc-logo.png" alt="Black Diamond Corporation"/>
+=======
+            <svg class="bdc-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00ACEE"/>
+                        <stop offset="100%" stop-color="#005F87"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 100,20 L 165,75 L 100,180 L 35,75 Z" fill="none" stroke="url(#blueGrad)" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M 100,45 L 145,83 L 100,150 L 55,83 Z" fill="none" stroke="url(#blueGrad)" stroke-width="2" stroke-linejoin="round"/>
+                <line x1="100" y1="20" x2="100" y2="180" stroke="url(#blueGrad)" stroke-width="1.5" stroke-dasharray="4 4"/>
+                <line x1="35" y1="75" x2="165" y2="75" stroke="url(#blueGrad)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            </svg>
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
             <h1>BLACK DIAMOND <span class="accent">CORPORATION</span></h1>
             <div class="tagline">Star Citizen Organization · Est. 2018</div>
             <div class="motto">Strength · Discipline · Diamond</div>
         </header>
 
         <!-- STATUS BANNER -->
+<<<<<<< HEAD
         <div class="status-banner active" id="status-banner">
             <div class="status-row">
                 <div class="status-indicator">
@@ -221,6 +240,19 @@
                 <div class="status-details">Connecting to Carbon-12...</div>
             </div>
             <div class="status-message">Live data loading from the fleet database.</div>
+=======
+        <div class="status-banner active">
+            <div class="status-row">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <div class="status-label">🔥 Active Campaign</div>
+                </div>
+                <div class="status-details">OPERATION: FRONTLINE FAVOR · START: 05/30/2026 · END: 06/30/2026 · PATCH: 4.8</div>
+            </div>
+            <div class="status-message">
+                Theme: Reputation grind for future OPs. Full cadence running. Progression clock active. Promotions flow.
+            </div>
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
         </div>
 
         <!-- COMMAND SECTION -->
@@ -307,7 +339,11 @@
                 <h2>Honors & Recognition</h2>
                 <span class="section-meta">Permanent record</span>
             </div>
+<<<<<<< HEAD
             <div class="honors-grid" id="honors-grid">
+=======
+            <div class="honors-grid">
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
                 <div class="honor-card">
                     <div class="honor-title">🏅 Founders Mark</div>
                     <ul class="honor-list">
@@ -345,7 +381,11 @@
                 <h2>Campaign Log</h2>
                 <span class="section-meta">Operational history</span>
             </div>
+<<<<<<< HEAD
             <div class="campaign-log" id="campaign-log">
+=======
+            <div class="campaign-log">
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
                 <div class="campaign-row">
                     <div class="c-num">#01</div>
                     <div class="c-name">TBD — Awaiting Patch</div>
@@ -363,6 +403,7 @@
         </footer>
     </div>
 
+<<<<<<< HEAD
     <!-- LIVE INTEGRATION WITH CARBON-12 BOT
          Source of truth: api.blkdiamondcorporation.com/orgs/BDC/snapshot.json
          Populated sections: status banner, roster table, honors grid, campaign log.
@@ -610,6 +651,60 @@
         window.addEventListener('DOMContentLoaded', syncFromBot);
         // Auto-refresh every 60 seconds so promotions/awards land without a manual reload.
         setInterval(syncFromBot, 60_000);
+=======
+    <!-- DYNAMIC WEB SERVER INTEGRATION SCRIPT -->
+    <script>
+        const API_URL = 'https://api.blkdiamondcorporation.com/api/roster';
+
+        async function loadLiveRoster() {
+            const tbody = document.getElementById('roster-data');
+            const counter = document.getElementById('roster-counter');
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (!data.success || !data.members || data.members.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">📭 No verified crew members found in database.</td></tr>`;
+                    counter.textContent = '0 of 0 · page 1 of 1 ▸ OPERATIONS STANDING BY';
+                    return;
+                }
+
+                // Update section meta header count dynamically
+                const count = data.members.length;
+                counter.textContent = `${count} of ${count} · page 1 of 1 ▸ CLICK ANY ROW FOR MEMBER DETAIL`;
+
+                // Build out the list elements securely
+                tbody.innerHTML = data.members.map((member, index) => {
+                    const cleanRank = (member.rank || 'Crewman').toUpperCase();
+                    const cleanStatus = (member.status || 'Active').toLowerCase();
+                    
+                    return `
+                        <tr>
+                            <td><span class="lb-position ${index < 3 ? 'top-three' : ''}">#${String(index + 1).padStart(2, '0')}</span></td>
+                            <td><span class="rank-badge rank-CRM">${member.rank || 'Crewman'}</span></td>
+                            <td>
+                                <div class="member-cell">
+                                    <span class="member-bdc-tag">[BDC]</span>
+                                    <span class="handle">${member.handle}</span>
+                                </div>
+                            </td>
+                            <td class="last-seen-cell">${member.since || '2026'}</td>
+                            <td class="stars-cell">—</td>
+                            <td class="last-seen-cell">—</td>
+                            <td><span class="status-pill status-${cleanStatus}">${member.status || 'Active'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Tracker Core Connection Error:', err);
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--usmc-red); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">⚠️ Failed to sync with fleet database. Secure link offline.</td></tr>`;
+                counter.textContent = 'LINK ERROR · CONNECTION DISRUPTED';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadLiveRoster);
+>>>>>>> f0a77eb4112db43f1953d286e61aa80bbc457cc0
     </script>
 </body>
 </html>
