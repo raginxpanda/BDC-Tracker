@@ -1479,7 +1479,54 @@ const BDC_DATA = {
       "upcoming": true
     }
   ]
+};    {
+      "number": 1,
+      "name": "TBD — Awaiting Patch",
+      "start": "TBD",
+      "end": "TBD",
+      "patch": "TBD",
+      "participants": 0,
+      "ops": 0,
+      "result": "PENDING",
+      "upcoming": true
+    }
+  ]
 };
+// ─── Live snapshot from Carbon-12 bot ──────────────────────────────
+// Pulls the verified roster + promotion history from the bot and
+// merges into BDC_DATA. Static fields (command, honors, campaigns)
+// stay manually edited via the editor.
+const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
+
+(async function loadLiveSnapshot() {
+  try {
+    const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const live = await res.json();
+    if (Array.isArray(live.roster) && live.roster.length) {
+      BDC_DATA.roster = live.roster;
+    }
+    if (live.lastUpdated) BDC_DATA.lastUpdated = live.lastUpdated;
+    // If DOMContentLoaded already fired, refresh the affected sections.
+    if (document.readyState !== 'loading') {
+      if (typeof renderRoster === 'function') renderRoster();
+      if (typeof renderFooter === 'function') renderFooter();
+    }
+  } catch (err) {
+    console.warn('[tracker] live snapshot fetch failed, using static data:', err);
+  }
+})();
+// ───────────────────────────────────────────────────────────────────
+
+
+/* ============================================================
+   ░░  RENDER LOGIC — DO NOT EDIT BELOW THIS LINE  ░░
+   ============================================================ */
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, content) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
 
 
 /* ============================================================
