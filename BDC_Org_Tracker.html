@@ -205,7 +205,7 @@ body::before {
   font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
   border-radius: 2px; white-space: nowrap; border: 1px solid;
 }
-.rank-FA { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
+.rank-FADM { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
 .rank-ADM { color: var(--rank-adm); border-color: var(--rank-adm); background: rgba(0, 172, 238, 0.1); }
 .rank-CPT { color: var(--rank-cpt); border-color: var(--rank-cpt); background: rgba(178, 34, 34, 0.1); }
 .rank-LT { color: var(--rank-lt); border-color: var(--rank-lt); background: rgba(70, 130, 180, 0.1); }
@@ -675,7 +675,7 @@ const BDC_DATA = {
   },
   "command": [
     {
-      "rank": "FA",
+      "rank": "FADM",
       "rankTitle": "Fleet Admiral",
       "handle": "RaginXPanda",
       "callsign": "Cody · CEO",
@@ -1479,23 +1479,13 @@ const BDC_DATA = {
       "upcoming": true
     }
   ]
-};    {
-      "number": 1,
-      "name": "TBD — Awaiting Patch",
-      "start": "TBD",
-      "end": "TBD",
-      "patch": "TBD",
-      "participants": 0,
-      "ops": 0,
-      "result": "PENDING",
-      "upcoming": true
-    }
-  ]
 };
+
+
 // ─── Live snapshot from Carbon-12 bot ──────────────────────────────
-// Pulls the verified roster + promotion history from the bot and
-// merges into BDC_DATA. Static fields (command, honors, campaigns)
-// stay manually edited via the editor.
+// Pulls the verified roster + promotion history from the bot and merges
+// into BDC_DATA. Static fields (command, honors, campaigns) stay
+// manually edited via the editor.
 const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
 
 (async function loadLiveSnapshot() {
@@ -1507,7 +1497,6 @@ const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.js
       BDC_DATA.roster = live.roster;
     }
     if (live.lastUpdated) BDC_DATA.lastUpdated = live.lastUpdated;
-    // If DOMContentLoaded already fired, refresh the affected sections.
     if (document.readyState !== 'loading') {
       if (typeof renderRoster === 'function') renderRoster();
       if (typeof renderFooter === 'function') renderFooter();
@@ -1517,17 +1506,6 @@ const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.js
   }
 })();
 // ───────────────────────────────────────────────────────────────────
-
-
-/* ============================================================
-   ░░  RENDER LOGIC — DO NOT EDIT BELOW THIS LINE  ░░
-   ============================================================ */
-
-const $ = (id) => document.getElementById(id);
-const el = (tag, cls, content) => {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-
 
 /* ============================================================
    ░░  RENDER LOGIC — DO NOT EDIT BELOW THIS LINE  ░░
@@ -1540,8 +1518,8 @@ const el = (tag, cls, content) => {
   if (content !== undefined) e.innerHTML = content;
   return e;
 };
-const rankOrder = { FA: 0, ADM: 1, CPT: 2, LT: 3, PO: 4, CRM: 5, TRL: 6 };
-const rankFull = { FA: "Fleet Admiral", ADM: "Admiral", CPT: "Captain", LT: "Lieutenant", PO: "Petty Officer", CRM: "Crewman", TRL: "Trial" };
+const rankOrder = { FADM: 0, ADM: 1, CPT: 2, LT: 3, PO: 4, CRM: 5, TRL: 6 };
+const rankFull = { FADM: "Fleet Admiral", ADM: "Admiral", CPT: "Captain", LT: "Lieutenant", PO: "Petty Officer", CRM: "Crewman", TRL: "Trial" };
 
 const PAGE_SIZE = 10;
 
@@ -1598,7 +1576,7 @@ function renderCommand() {
   grid.innerHTML = "";
   BDC_DATA.command.forEach(c => {
     const rankColors = {
-      FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+      FADM: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
       LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
     };
     const card = el("div", "command-card");
@@ -1743,7 +1721,7 @@ function renderPagination(totalPages) {
 // ============================================================
 function openMemberModal(member) {
   const rankColors = {
-    FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+    FADM: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
     LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
   };
 
