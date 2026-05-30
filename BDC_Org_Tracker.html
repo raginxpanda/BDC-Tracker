@@ -205,7 +205,7 @@ body::before {
   font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
   border-radius: 2px; white-space: nowrap; border: 1px solid;
 }
-.rank-FADM { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
+.rank-FA { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
 .rank-ADM { color: var(--rank-adm); border-color: var(--rank-adm); background: rgba(0, 172, 238, 0.1); }
 .rank-CPT { color: var(--rank-cpt); border-color: var(--rank-cpt); background: rgba(178, 34, 34, 0.1); }
 .rank-LT { color: var(--rank-lt); border-color: var(--rank-lt); background: rgba(70, 130, 180, 0.1); }
@@ -664,7 +664,7 @@ const BDC_DATA = {
       "start": "05/29/2015",
       "projectedEnd": "06/30/2026",
       "patch": "4.8",
-      "theme": "Reputation Grind "
+      "theme": "REP"
     },
     "standbyInfo": {
       "lastCampaign": "—",
@@ -675,7 +675,7 @@ const BDC_DATA = {
   },
   "command": [
     {
-      "rank": "FADM",
+      "rank": "FA",
       "rankTitle": "Fleet Admiral",
       "handle": "RaginXPanda",
       "callsign": "Cody · CEO",
@@ -760,7 +760,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "active",
-      "affiliate": false,
+      "affiliate": true,
       "memberSince": "2020",
       "promotionHistory": [
         {
@@ -782,7 +782,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "active",
-      "affiliate": false,
+      "affiliate": true,
       "memberSince": "2020",
       "promotionHistory": [
         {
@@ -804,7 +804,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "active",
-      "affiliate": false,
+      "affiliate": true,
       "memberSince": "2020",
       "promotionHistory": [
         {
@@ -826,7 +826,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "active",
-      "affiliate": false,
+      "affiliate": true,
       "memberSince": "2021",
       "promotionHistory": [
         {
@@ -884,31 +884,10 @@ const BDC_DATA = {
     },
     {
       "rank": "CRM",
-      "handle": "Raylenn",
-      "stars": 0,
-      "quals": 0,
-      "status": "standby",
-      "affiliate": true,
-      "memberSince": "2021",
-      "promotionHistory": [
-        {
-          "date": "May 2026",
-          "from": "Captain",
-          "to": "Crewman",
-          "note": "System launch reset — re-earning rank under new criteria."
-        }
-      ],
-      "divisions": [],
-      "qualsList": [],
-      "badges": [],
-      "campaignsAttended": []
-    },
-    {
-      "rank": "CRM",
       "handle": "PandemicVapor",
       "stars": 0,
       "quals": 0,
-      "status": "standby",
+      "status": "active",
       "affiliate": false,
       "memberSince": "2020",
       "promotionHistory": [
@@ -926,11 +905,32 @@ const BDC_DATA = {
     },
     {
       "rank": "CRM",
+      "handle": "Raylenn",
+      "stars": 0,
+      "quals": 0,
+      "status": "active",
+      "affiliate": true,
+      "memberSince": "2021",
+      "promotionHistory": [
+        {
+          "date": "May 2026",
+          "from": "Captain",
+          "to": "Crewman",
+          "note": "System launch reset — re-earning rank under new criteria."
+        }
+      ],
+      "divisions": [],
+      "qualsList": [],
+      "badges": [],
+      "campaignsAttended": []
+    },
+    {
+      "rank": "CRM",
       "handle": "ice34",
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false,
+      "affiliate": true,
       "memberSince": "2021"
     },
     {
@@ -1020,7 +1020,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false
+      "affiliate": true
     },
     {
       "rank": "CRM",
@@ -1036,7 +1036,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false
+      "affiliate": true
     },
     {
       "rank": "CRM",
@@ -1092,7 +1092,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false
+      "affiliate": true
     },
     {
       "rank": "CRM",
@@ -1100,7 +1100,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false
+      "affiliate": true
     },
     {
       "rank": "CRM",
@@ -1116,7 +1116,7 @@ const BDC_DATA = {
       "stars": 0,
       "quals": 0,
       "status": "standby",
-      "affiliate": false
+      "affiliate": true
     },
     {
       "rank": "CRM",
@@ -1458,7 +1458,8 @@ const BDC_DATA = {
   "honors": {
     "foundersMark": [
       "RaginXPanda",
-      "BDC_Narwhal_OG"
+      "BDC_Narwhal_OG",
+      "SaintLoneStar"
     ],
     "campaignVeterans": [],
     "standardBearers": [],
@@ -1482,31 +1483,6 @@ const BDC_DATA = {
 };
 
 
-// ─── Live snapshot from Carbon-12 bot ──────────────────────────────
-// Pulls the verified roster + promotion history from the bot and merges
-// into BDC_DATA. Static fields (command, honors, campaigns) stay
-// manually edited via the editor.
-const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
-
-(async function loadLiveSnapshot() {
-  try {
-    const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
-    if (!res.ok) return;
-    const live = await res.json();
-    if (Array.isArray(live.roster) && live.roster.length) {
-      BDC_DATA.roster = live.roster;
-    }
-    if (live.lastUpdated) BDC_DATA.lastUpdated = live.lastUpdated;
-    if (document.readyState !== 'loading') {
-      if (typeof renderRoster === 'function') renderRoster();
-      if (typeof renderFooter === 'function') renderFooter();
-    }
-  } catch (err) {
-    console.warn('[tracker] live snapshot fetch failed, using static data:', err);
-  }
-})();
-// ───────────────────────────────────────────────────────────────────
-
 /* ============================================================
    ░░  RENDER LOGIC — DO NOT EDIT BELOW THIS LINE  ░░
    ============================================================ */
@@ -1518,8 +1494,8 @@ const el = (tag, cls, content) => {
   if (content !== undefined) e.innerHTML = content;
   return e;
 };
-const rankOrder = { FADM: 0, ADM: 1, CPT: 2, LT: 3, PO: 4, CRM: 5, TRL: 6 };
-const rankFull = { FADM: "Fleet Admiral", ADM: "Admiral", CPT: "Captain", LT: "Lieutenant", PO: "Petty Officer", CRM: "Crewman", TRL: "Trial" };
+const rankOrder = { FA: 0, ADM: 1, CPT: 2, LT: 3, PO: 4, CRM: 5, TRL: 6 };
+const rankFull = { FA: "Fleet Admiral", ADM: "Admiral", CPT: "Captain", LT: "Lieutenant", PO: "Petty Officer", CRM: "Crewman", TRL: "Trial" };
 
 const PAGE_SIZE = 10;
 
@@ -1576,7 +1552,7 @@ function renderCommand() {
   grid.innerHTML = "";
   BDC_DATA.command.forEach(c => {
     const rankColors = {
-      FADM: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+      FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
       LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
     };
     const card = el("div", "command-card");
@@ -1721,7 +1697,7 @@ function renderPagination(totalPages) {
 // ============================================================
 function openMemberModal(member) {
   const rankColors = {
-    FADM: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+    FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
     LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
   };
 
