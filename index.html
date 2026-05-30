@@ -13,38 +13,39 @@
    ============================================================ */
 
 :root {
-  --bg-0: #0A0A0C;
-  --bg-1: #111114;
-  --bg-2: #16161B;
-  --bg-3: #1E1E25;
-  --border: #2A2A33;
-  --border-bright: #3A3A47;
-  --text: #E8E8F0;
-  --text-dim: #9A9AAB;
-  --text-faint: #5A5A6A;
+    --bg-0: #0A0A0C;
+    --bg-1: #111114;
+    --bg-2: #16161B;
+    --bg-3: #1E1E25;
 
-  /* BDC brand colors */
-  --bdc-blue: #00ACEE;
-  --bdc-blue-dim: #006F9A;
-  --bdc-blue-glow: rgba(0, 172, 238, 0.25);
-  --bdc-black: #1A1A1A;
-  --diamond: #E8E8F0;
+    --border: #2A2A33;
+    --border-bright: #3A3A47;
+    --text: #E8E8F0;
+    --text-dim: #9A9AAB;
+    --text-faint: #5A5A6A;
 
-  /* Rank insignia colors */
-  --rank-fa: #E8E8F0;        /* diamond white — top tier */
-  --rank-adm: #00ACEE;        /* BDC blue — XO */
-  --rank-cpt: #B22222;        /* crimson */
-  --rank-lt: #4682B4;         /* steel blue */
-  --rank-po: #1F3A93;         /* navy */
-  --rank-crm: #7A9CC6;        /* light steel */
-  --rank-trial: #A9A9A9;      /* gray */
-  --rank-reserve: #708090;    /* slate */
+    /* BDC brand colors */
+    --bdc-blue: #00ACEE;
+    --bdc-blue-dim: #006F9A;
+    --bdc-blue-glow: rgba(0, 172, 238, 0.25);
+    --bdc-black: #1A1A1A;
+    --diamond: #E8E8F0;
 
-  --active-orange: #E8652B;
-  --standby-slate: #6B7280;
+    /* Rank insignia colors */
+    --rank-fadm: #E8E8F0;       /* diamond white - fleet admiral */
+    --rank-adm: #00ACEE;        /* BDC blue - XO */
+    --rank-cpt: #B22222;        /* crimson */
+    --rank-lt: #4682B4;         /* steel blue */
+    --rank-po: #1F3A93;         /* navy */
+    --rank-crm: #7A9CC6;        /* light steel */
+    --rank-trial: #A9A9A9;      /* gray */
+    --rank-reserve: #708090;    /* slate */
 
-  --usmc-red: #BC1F2A;
-  --usmc-blue: #002F6C;
+    --active-orange: #E65C2B;
+    --standby-slate: #6B7280;
+
+    --usmc-red: #BC1F2A;
+    --usmc-blue: #002F6C;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -205,7 +206,7 @@ body::before {
   font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
   border-radius: 2px; white-space: nowrap; border: 1px solid;
 }
-.rank-FA { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
+.rank-FA { color: var(--rank-fadm); border-color: var(--rank-fadm); background: rgba(232, 232, 240, 0.08); }
 .rank-ADM { color: var(--rank-adm); border-color: var(--rank-adm); background: rgba(0, 172, 238, 0.1); }
 .rank-CPT { color: var(--rank-cpt); border-color: var(--rank-cpt); background: rgba(178, 34, 34, 0.1); }
 .rank-LT { color: var(--rank-lt); border-color: var(--rank-lt); background: rgba(70, 130, 180, 0.1); }
@@ -1626,7 +1627,7 @@ function renderCommand() {
   grid.innerHTML = "";
   BDC_DATA.command.forEach(c => {
     const rankColors = {
-      FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+      FA: "var(--rank-fadm)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
       LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
     };
     const card = el("div", "command-card");
@@ -1771,7 +1772,7 @@ function renderPagination(totalPages) {
 // ============================================================
 function openMemberModal(member) {
   const rankColors = {
-    FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+    FA: "var(--rank-fadm)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
     LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
   };
 
@@ -2143,7 +2144,7 @@ document.addEventListener("DOMContentLoaded", () => {
   font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
   border-radius: 2px; white-space: nowrap; border: 1px solid;
 }
-.rank-FA { color: var(--rank-fa); border-color: var(--rank-fa); background: rgba(232, 232, 240, 0.08); }
+.rank-FA { color: var(--rank-fadm); border-color: var(--rank-fadm); background: rgba(232, 232, 240, 0.08); }
 .rank-ADM { color: var(--rank-adm); border-color: var(--rank-adm); background: rgba(0, 172, 238, 0.1); }
 .rank-CPT { color: var(--rank-cpt); border-color: var(--rank-cpt); background: rgba(178, 34, 34, 0.1); }
 .rank-LT { color: var(--rank-lt); border-color: var(--rank-lt); background: rgba(70, 130, 180, 0.1); }
@@ -3564,7 +3565,7 @@ function renderCommand() {
   grid.innerHTML = "";
   BDC_DATA.command.forEach(c => {
     const rankColors = {
-      FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+      FA: "var(--rank-fadm)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
       LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
     };
     const card = el("div", "command-card");
@@ -3709,7 +3710,7 @@ function renderPagination(totalPages) {
 // ============================================================
 function openMemberModal(member) {
   const rankColors = {
-    FA: "var(--rank-fa)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
+    FA: "var(--rank-fadm)", ADM: "var(--rank-adm)", CPT: "var(--rank-cpt)",
     LT: "var(--rank-lt)", PO: "var(--rank-po)", CRM: "var(--rank-crm)", TRL: "var(--rank-trial)"
   };
 
