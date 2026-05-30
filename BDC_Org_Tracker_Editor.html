@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDC Tracker Editor — Officers Only</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #0A0A0C; --bg-1: #111114; --bg-2: #16161B; --bg-3: #1E1E25;
+  --border: #2A2A33; --border-bright: #3A3A47;
+  --text: #E8E8F0; --text-dim: #9A9AAB; --text-faint: #5A5A6A;
+  --bdc-blue: #00ACEE; --bdc-blue-dim: #006F9A;
+  --diamond: #E8E8F0;
+  --success: #34D399; --warning: #E8652B; --danger: #EF4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-0); color: var(--text); font-family: 'Sora', sans-serif; min-height: 100vh; padding-bottom: 120px; }
+
+/* HEADER */
+.editor-header {
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+  border-bottom: 2px solid var(--bdc-blue);
+  padding: 24px 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+}
+.editor-title {
+  display: flex; align-items: center; gap: 16px;
+}
+.editor-title-text h1 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.1em; color: var(--text);
+}
+.editor-title-text .sub {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: var(--bdc-blue);
+}
+.editor-mark {
+  background: var(--warning); color: white;
+  padding: 4px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.2em; border-radius: 2px;
+}
+
+.action-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  background: var(--bg-1); border: 1px solid var(--border); color: var(--text);
+  padding: 10px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  border-radius: 2px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--bdc-blue); color: var(--bdc-blue); }
+.btn.primary { background: var(--bdc-blue); color: var(--bg-0); border-color: var(--bdc-blue); font-weight: 700; }
+.btn.primary:hover { background: #38B8F0; }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover { background: var(--danger); color: white; }
+.btn.small { padding: 6px 10px; font-size: 9px; }
+
+/* CONTAINER */
+.container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+
+/* STATUS BANNER */
+.load-status {
+  background: var(--bg-1); border: 1px solid var(--border); border-left: 3px solid var(--warning);
+  padding: 16px 20px; margin-bottom: 24px; font-size: 13px; color: var(--text-dim);
+}
+.load-status.loaded { border-left-color: var(--success); }
+.load-status strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 14px; }
+
+/* SECTIONS */
+.section {
+  background: var(--bg-1); border: 1px solid var(--border); border-radius: 2px;
+  margin-bottom: 24px; overflow: hidden;
+}
+.section-header {
+  background: var(--bg-2); padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.section-header h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.15em; color: var(--text);
+}
+.section-header .num {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--bdc-blue);
+  letter-spacing: 0.2em; margin-right: 12px;
+}
+.section-body { padding: 20px; }
+.section-body.compact { padding: 12px; }
+
+/* FORM ELEMENTS */
+label.field-label {
+  display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.15em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 4px;
+}
+input[type="text"], input[type="number"], textarea, select {
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
+  padding: 8px 12px; font-family: 'Sora', sans-serif; font-size: 13px;
+  border-radius: 2px; width: 100%; transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--bdc-blue); }
+textarea { font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical; min-height: 60px; }
+
+.field-row {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 12px;
+}
+
+input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--bdc-blue); cursor: pointer;
+}
+.check-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text); padding: 8px 0;
+}
+
+/* COMMAND CARDS */
+.command-card-editor {
+  background: var(--bg-2); border: 1px solid var(--border); border-left: 3px solid var(--bdc-blue);
+  padding: 20px; margin-bottom: 12px; border-radius: 2px;
+}
+.command-card-editor h3 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em;
+  color: var(--bdc-blue); margin-bottom: 12px;
+}
+
+/* ROSTER */
+.roster-editor { overflow-x: auto; }
+.roster-row {
+  display: grid;
+  grid-template-columns: 36px 70px 1fr 85px 100px 50px 90px 90px 100px 130px;
+  gap: 8px; padding: 10px 12px; align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; min-width: 1000px;
+}
+.roster-row.header {
+  background: var(--bg-2); font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em; color: var(--text-faint); text-transform: uppercase;
+}
+.roster-row:hover:not(.header) { background: var(--bg-2); }
+.roster-row.dragging { opacity: 0.3; }
+.roster-row input, .roster-row select { padding: 5px 8px; font-size: 12px; }
+.roster-row .pos {
+  font-family: 'JetBrains Mono', monospace; color: var(--bdc-blue); font-weight: 700;
+  font-size: 11px; text-align: center;
+}
+.move-cell { display: flex; gap: 4px; justify-content: center; }
+.move-btn {
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--text-dim);
+  width: 22px; height: 22px; font-size: 10px; cursor: pointer; border-radius: 2px;
+  padding: 0; line-height: 1;
+}
+.move-btn:hover { border-color: var(--bdc-blue); color: var(--bdc-blue); }
+.action-cell { display: flex; gap: 4px; justify-content: center; }
+
+.add-row-btn {
+  width: 100%; padding: 12px; background: var(--bg-2); border: 1px dashed var(--border-bright);
+  color: var(--bdc-blue); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.15em; cursor: pointer; border-radius: 2px; transition: all 0.2s; margin-top: 8px;
+}
+.add-row-btn:hover { background: var(--bg-3); border-color: var(--bdc-blue); }
+
+/* HONORS / CAMPAIGN LISTS */
+.list-editor { display: flex; flex-direction: column; gap: 8px; }
+.list-item {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--bg-2); padding: 8px; border-radius: 2px;
+}
+.list-item input { flex: 1; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg-1); border: 1px solid var(--bdc-blue);
+  border-radius: 2px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;
+}
+.modal-box-header {
+  background: var(--bg-2); padding: 16px 24px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-box-header h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; color: var(--bdc-blue);
+}
+.modal-box-body { padding: 24px; }
+
+/* PROMO HISTORY EDITOR */
+.promo-row {
+  background: var(--bg-2); padding: 12px; margin-bottom: 8px; border-radius: 2px;
+  border-left: 3px solid var(--bdc-blue);
+}
+
+/* FLOATING EXPORT */
+.floating-export {
+  position: fixed; bottom: 24px; right: 24px; z-index: 90;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 172, 238, 0.3);
+}
+
+/* TOAST */
+.toast {
+  position: fixed; top: 90px; right: 24px; z-index: 200;
+  background: var(--bg-1); border: 1px solid var(--success); border-left: 3px solid var(--success);
+  padding: 12px 20px; font-size: 13px; color: var(--text);
+  opacity: 0; transform: translateX(20px); transition: all 0.3s;
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast.error { border-color: var(--danger); border-left-color: var(--danger); }
+
+/* HELPER NOTE */
+.help-note {
+  background: rgba(0, 172, 238, 0.05); border-left: 3px solid var(--bdc-blue);
+  padding: 12px 16px; font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-bottom: 16px;
+}
+.help-note strong { color: var(--bdc-blue); display: block; margin-bottom: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; }
+
+@media (max-width: 720px) {
+  .container { padding: 16px; }
+  .editor-header { padding: 16px; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="editor-header">
+  <div class="editor-title">
+    <span class="editor-mark">EDIT MODE</span>
+    <div class="editor-title-text">
+      <h1>BDC TRACKER EDITOR</h1>
+      <div class="sub">OFFICERS ONLY · DO NOT DISTRIBUTE</div>
+    </div>
+  </div>
+  <div class="action-bar">
+    <input type="file" id="file-input" accept=".html" style="display:none">
+    <button class="btn" onclick="document.getElementById('file-input').click()">📂 Load Tracker</button>
+    <button class="btn" onclick="initFreshData()">✨ Start Fresh</button>
+    <button class="btn primary" onclick="exportTracker()">💾 Export Updated Tracker</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="load-status" id="load-status">
+    <strong>No tracker loaded yet</strong>
+    Click "Load Tracker" and pick your current <code>BDC_Org_Tracker.html</code> file. Or click "Start Fresh" to build from scratch.
+  </div>
+
+  <div id="editor-content" style="display:none;">
+
+    <div class="help-note">
+      <strong>WORKFLOW</strong>
+      Edit anything you want. When done, click <strong>Export Updated Tracker</strong> at the top-right. It downloads a new HTML file — share that with the org or replace your hosted version.
+    </div>
+
+    <!-- MODE SECTION -->
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">[01]</span>Current Mode</h2>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div>
+            <label class="field-label">Org Mode</label>
+            <select id="mode-state" onchange="renderModeFields()">
+              <option value="standby">🟡 Standby</option>
+              <option value="active">🔥 Active Campaign</option>
+            </select>
+          </div>
+        </div>
+        <div id="mode-fields"></div>
+      </div>
+    </div>
+
+    <!-- COMMAND SECTION -->
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">[02]</span>Command</h2>
+      </div>
+      <div class="section-body" id="command-body"></div>
+    </div>
+
+    <!-- ROSTER SECTION -->
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">[03]</span>Member Roster</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);letter-spacing:0.15em;" id="roster-count-info">0 MEMBERS</span>
+      </div>
+      <div class="section-body">
+        <div class="help-note">
+          <strong>QUICK EDITS</strong>
+          Click ▲/▼ to reorder. Click ✎ for promotion history. Click 🗑 to remove. Click ➕ at bottom to add. Order = leaderboard order on the live tracker (active members first, page 1).
+        </div>
+        <div class="roster-editor">
+          <div class="roster-row header">
+            <div>#</div>
+            <div>Move</div>
+            <div>Handle</div>
+            <div>Rank</div>
+            <div>Status</div>
+            <div>AFF</div>
+            <div>⭐ Stars</div>
+            <div>Quals</div>
+            <div>Member Since</div>
+            <div>Actions</div>
+          </div>
+          <div id="roster-body"></div>
+          <button class="add-row-btn" onclick="addMember()">➕ Add New Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HONORS SECTION -->
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">[04]</span>Honors</h2>
+      </div>
+      <div class="section-body" id="honors-body"></div>
+    </div>
+
+    <!-- CAMPAIGNS SECTION -->
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">[05]</span>Campaign Log</h2>
+      </div>
+      <div class="section-body" id="campaigns-body"></div>
+    </div>
+
+  </div>
+</div>
+
+<button class="btn primary floating-export" id="floating-export" onclick="exportTracker()" style="display:none;">💾 EXPORT UPDATED TRACKER</button>
+
+<!-- MODAL FOR PROMOTION HISTORY -->
+<div class="modal-overlay" id="promo-modal">
+  <div class="modal-box">
+    <div class="modal-box-header">
+      <h2 id="promo-modal-title">Promotion History</h2>
+      <button class="btn small" onclick="closePromoModal()">✕ Close</button>
+    </div>
+    <div class="modal-box-body" id="promo-modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL FOR FULL PROFILE EDIT (divisions, quals list, badges, notes, ops stats) -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-box">
+    <div class="modal-box-header">
+      <h2 id="profile-modal-title">Full Profile</h2>
+      <button class="btn small" onclick="closeProfileModal()">✕ Close</button>
+    </div>
+    <div class="modal-box-body" id="profile-modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// BDC TRACKER EDITOR
+// Loads existing tracker → edit via forms → exports new tracker
+// ============================================================
+
+let bdcData = null;
+let originalHTML = null;
+const $ = (id) => document.getElementById(id);
+
+const RANKS = { FA: "Fleet Admiral", ADM: "Admiral", CPT: "Captain", LT: "Lieutenant", PO: "Petty Officer", CRM: "Crewman", TRL: "Trial" };
+const STATUSES = ["active", "standby", "trial", "reserve"];
+
+// ============================================================
+// LOAD FILE
+// ============================================================
+$("file-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    originalHTML = ev.target.result;
+    const match = originalHTML.match(/const BDC_DATA = (\{[\s\S]*?\n\});/);
+    if (!match) {
+      toast("Could not find BDC_DATA in this file. Is it a BDC tracker?", true);
+      return;
+    }
+    try {
+      // Parse the JS object literal safely
+      bdcData = eval('(' + match[1] + ')');
+      $("load-status").classList.add("loaded");
+      $("load-status").innerHTML = `<strong>✓ Tracker loaded</strong>${bdcData.roster.length} members · Mode: ${bdcData.mode.state} · Last updated: ${bdcData.lastUpdated || "—"}`;
+      $("editor-content").style.display = "block";
+      $("floating-export").style.display = "inline-flex";
+      renderAll();
+      toast("Tracker loaded successfully");
+    } catch (err) {
+      console.error(err);
+      toast("Error parsing data: " + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+});
+
+function initFreshData() {
+  bdcData = {
+    lastUpdated: new Date().toLocaleString("en-US", { month: "short", year: "numeric" }),
+    mode: { state: "standby", currentCampaign: null, standbyInfo: { lastCampaign: "—", crossGameCaptain: "—", runningNow: "—", message: "Standby." } },
+    command: [],
+    roster: [],
+    honors: { foundersMark: [], campaignVeterans: [], standardBearers: [], recentPromotions: [], memberOfCampaign: [], heartOfBDC: [] },
+    campaigns: []
+  };
+  originalHTML = null;
+  $("load-status").classList.add("loaded");
+  $("load-status").innerHTML = `<strong>✓ Fresh data initialized</strong>Build your tracker from scratch. Note: starting fresh means the exported file won't have the full HTML template — recommend loading an existing tracker first.`;
+  $("editor-content").style.display = "block";
+  $("floating-export").style.display = "inline-flex";
+  renderAll();
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderAll() {
+  $("mode-state").value = bdcData.mode.state;
+  renderModeFields();
+  renderCommand();
+  renderRoster();
+  renderHonors();
+  renderCampaigns();
+}
+
+function renderModeFields() {
+  const state = $("mode-state").value;
+  bdcData.mode.state = state;
+  const c = bdcData.mode.currentCampaign || {};
+  const s = bdcData.mode.standbyInfo || {};
+
+  if (state === "active") {
+    $("mode-fields").innerHTML = `
+      <div class="field-row">
+        <div><label class="field-label">Campaign Name</label><input type="text" value="${esc(c.name || '')}" oninput="bdcData.mode.currentCampaign = bdcData.mode.currentCampaign || {}; bdcData.mode.currentCampaign.name = this.value"></div>
+        <div><label class="field-label">Start Date</label><input type="text" value="${esc(c.start || '')}" oninput="bdcData.mode.currentCampaign.start = this.value" placeholder="e.g. 2026-06-01"></div>
+        <div><label class="field-label">Projected End</label><input type="text" value="${esc(c.projectedEnd || '')}" oninput="bdcData.mode.currentCampaign.projectedEnd = this.value"></div>
+        <div><label class="field-label">Patch</label><input type="text" value="${esc(c.patch || '')}" oninput="bdcData.mode.currentCampaign.patch = this.value"></div>
+        <div><label class="field-label">Theme</label><input type="text" value="${esc(c.theme || '')}" oninput="bdcData.mode.currentCampaign.theme = this.value"></div>
+      </div>
+    `;
+  } else {
+    $("mode-fields").innerHTML = `
+      <div class="field-row">
+        <div><label class="field-label">Last Campaign</label><input type="text" value="${esc(s.lastCampaign || '')}" oninput="bdcData.mode.standbyInfo.lastCampaign = this.value"></div>
+        <div><label class="field-label">Cross-Game Captain</label><input type="text" value="${esc(s.crossGameCaptain || '')}" oninput="bdcData.mode.standbyInfo.crossGameCaptain = this.value"></div>
+        <div><label class="field-label">Running Now</label><input type="text" value="${esc(s.runningNow || '')}" oninput="bdcData.mode.standbyInfo.runningNow = this.value"></div>
+      </div>
+      <div>
+        <label class="field-label">Standby Message</label>
+        <textarea oninput="bdcData.mode.standbyInfo.message = this.value">${esc(s.message || '')}</textarea>
+      </div>
+    `;
+  }
+}
+
+function renderCommand() {
+  $("command-body").innerHTML = "";
+  bdcData.command.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "command-card-editor";
+    card.innerHTML = `
+      <h3>${c.rankTitle || "—"} — ${c.handle || "—"}</h3>
+      <div class="field-row">
+        <div><label class="field-label">Rank Code</label>
+          <select onchange="bdcData.command[${idx}].rank = this.value; renderCommand();">
+            ${Object.entries(RANKS).map(([k,v]) => `<option value="${k}" ${c.rank===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div><label class="field-label">Rank Title</label><input type="text" value="${esc(c.rankTitle || '')}" oninput="bdcData.command[${idx}].rankTitle = this.value"></div>
+        <div><label class="field-label">Handle</label><input type="text" value="${esc(c.handle || '')}" oninput="bdcData.command[${idx}].handle = this.value"></div>
+        <div><label class="field-label">Callsign</label><input type="text" value="${esc(c.callsign || '')}" oninput="bdcData.command[${idx}].callsign = this.value"></div>
+        <div><label class="field-label">Rank Stars (display)</label><input type="text" value="${esc(c.rankStars || '')}" oninput="bdcData.command[${idx}].rankStars = this.value" placeholder="★★★★★"></div>
+        <div><label class="field-label">Member Since</label><input type="text" value="${esc(c.memberSince || '')}" oninput="bdcData.command[${idx}].memberSince = this.value"></div>
+        <div><label class="field-label">Status</label>
+          <select onchange="bdcData.command[${idx}].status = this.value;">
+            <option value="active" ${c.status==='active'?'selected':''}>Active</option>
+            <option value="reserve" ${c.status==='reserve'?'selected':''}>Reserve</option>
+          </select>
+        </div>
+        <div><label class="field-label">Stars</label><input type="number" min="0" value="${c.stars || 0}" oninput="bdcData.command[${idx}].stars = parseInt(this.value)||0"></div>
+        <div><label class="field-label">Quals</label><input type="number" min="0" value="${c.quals || 0}" oninput="bdcData.command[${idx}].quals = parseInt(this.value)||0"></div>
+      </div>
+      <div>
+        <label class="field-label">Bio (shown on card)</label>
+        <textarea oninput="bdcData.command[${idx}].bio = this.value">${esc(c.bio || '')}</textarea>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="btn small" onclick="openPromoModal('command', ${idx})">✎ Edit Promotion History (${(c.promotionHistory||[]).length} entries)</button>
+        <button class="btn small danger" onclick="removeCommand(${idx})">🗑 Remove</button>
+      </div>
+    `;
+    $("command-body").appendChild(card);
+  });
+  const addBtn = document.createElement("button");
+  addBtn.className = "add-row-btn";
+  addBtn.innerHTML = "➕ Add Command Member";
+  addBtn.onclick = addCommand;
+  $("command-body").appendChild(addBtn);
+}
+
+function renderRoster() {
+  const body = $("roster-body");
+  body.innerHTML = "";
+  bdcData.roster.forEach((r, idx) => {
+    const row = document.createElement("div");
+    row.className = "roster-row";
+    row.innerHTML = `
+      <div class="pos">#${String(idx+1).padStart(2,'0')}</div>
+      <div class="move-cell">
+        <button class="move-btn" onclick="moveMember(${idx}, -1)" title="Move up">▲</button>
+        <button class="move-btn" onclick="moveMember(${idx}, 1)" title="Move down">▼</button>
+      </div>
+      <div><input type="text" value="${esc(r.handle || '')}" oninput="bdcData.roster[${idx}].handle = this.value"></div>
+      <div>
+        <select onchange="bdcData.roster[${idx}].rank = this.value">
+          ${Object.entries(RANKS).map(([k,v]) => `<option value="${k}" ${r.rank===k?'selected':''}>${k}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <select onchange="bdcData.roster[${idx}].status = this.value">
+          ${STATUSES.map(s => `<option value="${s}" ${r.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div style="text-align:center;">
+        <input type="checkbox" ${r.affiliate?'checked':''} onchange="bdcData.roster[${idx}].affiliate = this.checked">
+      </div>
+      <div style="display:flex;gap:2px;align-items:center;">
+        <button class="move-btn" onclick="bumpStars(${idx}, -1)">−</button>
+        <input type="number" min="0" value="${r.stars || 0}" oninput="bdcData.roster[${idx}].stars = parseInt(this.value)||0" style="width:36px;text-align:center;">
+        <button class="move-btn" onclick="bumpStars(${idx}, 1)">+</button>
+      </div>
+      <div style="display:flex;gap:2px;align-items:center;">
+        <button class="move-btn" onclick="bumpQuals(${idx}, -1)">−</button>
+        <input type="number" min="0" value="${r.quals || 0}" oninput="bdcData.roster[${idx}].quals = parseInt(this.value)||0" style="width:36px;text-align:center;">
+        <button class="move-btn" onclick="bumpQuals(${idx}, 1)">+</button>
+      </div>
+      <div><input type="text" value="${esc(r.memberSince || '')}" oninput="bdcData.roster[${idx}].memberSince = this.value" placeholder="2020"></div>
+      <div class="action-cell">
+        <button class="btn small" onclick="openProfileModal('roster', ${idx})" title="Edit divisions, quals, badges, notes">✎ Profile</button>
+        <button class="btn small" onclick="openPromoModal('roster', ${idx})" title="Promotion history">📜</button>
+        <button class="btn small danger" onclick="removeMember(${idx})" title="Remove member">🗑</button>
+      </div>
+    `;
+    body.appendChild(row);
+  });
+  $("roster-count-info").textContent = `${bdcData.roster.length} MEMBERS`;
+}
+
+function renderHonors() {
+  const body = $("honors-body");
+  const honors = bdcData.honors;
+  const sections = [
+    { key: "foundersMark", title: "🏅 Founders Mark", placeholder: "RSI handle" },
+    { key: "campaignVeterans", title: "🏅 Campaign Veterans (5+ stars)", placeholder: "RSI handle" },
+    { key: "standardBearers", title: "🏅 Standard Bearers (10+ stars)", placeholder: "RSI handle" }
+  ];
+  body.innerHTML = sections.map(s => `
+    <div style="margin-bottom:20px;">
+      <label class="field-label">${s.title}</label>
+      <div class="list-editor" id="honors-${s.key}"></div>
+      <button class="add-row-btn" onclick="addHonor('${s.key}')" style="margin-top:8px;">➕ Add</button>
+    </div>
+  `).join('');
+  sections.forEach(s => {
+    const listEl = $(`honors-${s.key}`);
+    (honors[s.key] || []).forEach((item, idx) => {
+      const row = document.createElement("div");
+      row.className = "list-item";
+      row.innerHTML = `
+        <input type="text" value="${esc(item)}" oninput="bdcData.honors.${s.key}[${idx}] = this.value" placeholder="${s.placeholder}">
+        <button class="btn small danger" onclick="removeHonor('${s.key}', ${idx})">🗑</button>
+      `;
+      listEl.appendChild(row);
+    });
+  });
+}
+
+function renderCampaigns() {
+  const body = $("campaigns-body");
+  body.innerHTML = "";
+  bdcData.campaigns.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "command-card-editor";
+    card.innerHTML = `
+      <div class="field-row">
+        <div><label class="field-label">Number</label><input type="number" value="${c.number || 1}" oninput="bdcData.campaigns[${idx}].number = parseInt(this.value)||1"></div>
+        <div><label class="field-label">Name</label><input type="text" value="${esc(c.name || '')}" oninput="bdcData.campaigns[${idx}].name = this.value"></div>
+        <div><label class="field-label">Start</label><input type="text" value="${esc(c.start || '')}" oninput="bdcData.campaigns[${idx}].start = this.value"></div>
+        <div><label class="field-label">End</label><input type="text" value="${esc(c.end || '')}" oninput="bdcData.campaigns[${idx}].end = this.value"></div>
+        <div><label class="field-label">Patch</label><input type="text" value="${esc(c.patch || '')}" oninput="bdcData.campaigns[${idx}].patch = this.value"></div>
+        <div><label class="field-label">Participants</label><input type="number" value="${c.participants || 0}" oninput="bdcData.campaigns[${idx}].participants = parseInt(this.value)||0"></div>
+        <div><label class="field-label">Ops</label><input type="number" value="${c.ops || 0}" oninput="bdcData.campaigns[${idx}].ops = parseInt(this.value)||0"></div>
+        <div><label class="field-label">Result</label><input type="text" value="${esc(c.result || '')}" oninput="bdcData.campaigns[${idx}].result = this.value"></div>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" ${c.upcoming ? 'checked' : ''} onchange="bdcData.campaigns[${idx}].upcoming = this.checked"> Upcoming (greyed out on tracker)
+      </div>
+      <button class="btn small danger" onclick="removeCampaign(${idx})">🗑 Remove</button>
+    `;
+    body.appendChild(card);
+  });
+  const addBtn = document.createElement("button");
+  addBtn.className = "add-row-btn";
+  addBtn.innerHTML = "➕ Add Campaign";
+  addBtn.onclick = addCampaign;
+  body.appendChild(addBtn);
+}
+
+// ============================================================
+// MUTATIONS
+// ============================================================
+function addMember() {
+  bdcData.roster.push({ rank: "CRM", handle: "NewMember", stars: 0, quals: 0, status: "active", affiliate: false });
+  renderRoster();
+  toast("Member added — scroll to bottom of roster");
+}
+function removeMember(idx) {
+  if (!confirm(`Remove ${bdcData.roster[idx].handle}?`)) return;
+  bdcData.roster.splice(idx, 1);
+  renderRoster();
+}
+function moveMember(idx, delta) {
+  const target = idx + delta;
+  if (target < 0 || target >= bdcData.roster.length) return;
+  [bdcData.roster[idx], bdcData.roster[target]] = [bdcData.roster[target], bdcData.roster[idx]];
+  renderRoster();
+}
+function bumpStars(idx, delta) {
+  bdcData.roster[idx].stars = Math.max(0, (bdcData.roster[idx].stars || 0) + delta);
+  renderRoster();
+}
+function bumpQuals(idx, delta) {
+  bdcData.roster[idx].quals = Math.max(0, (bdcData.roster[idx].quals || 0) + delta);
+  renderRoster();
+}
+
+function addCommand() {
+  bdcData.command.push({ rank: "CPT", rankTitle: "Captain", handle: "—", callsign: "—", bio: "", rankStars: "★★★", status: "active", memberSince: "", stars: 0, quals: 0 });
+  renderCommand();
+}
+function removeCommand(idx) {
+  if (!confirm("Remove this command member?")) return;
+  bdcData.command.splice(idx, 1);
+  renderCommand();
+}
+
+function addHonor(key) {
+  if (!bdcData.honors[key]) bdcData.honors[key] = [];
+  bdcData.honors[key].push("");
+  renderHonors();
+}
+function removeHonor(key, idx) {
+  bdcData.honors[key].splice(idx, 1);
+  renderHonors();
+}
+
+function addCampaign() {
+  bdcData.campaigns.unshift({ number: bdcData.campaigns.length + 1, name: "TBD", start: "TBD", end: "TBD", patch: "TBD", participants: 0, ops: 0, result: "PENDING", upcoming: true });
+  renderCampaigns();
+}
+function removeCampaign(idx) {
+  if (!confirm("Remove this campaign entry?")) return;
+  bdcData.campaigns.splice(idx, 1);
+  renderCampaigns();
+}
+
+// ============================================================
+// PROMOTION HISTORY MODAL
+// ============================================================
+let promoTarget = null;
+function openPromoModal(type, idx) {
+  promoTarget = { type, idx };
+  const member = type === "command" ? bdcData.command[idx] : bdcData.roster[idx];
+  if (!member.promotionHistory) member.promotionHistory = [];
+  $("promo-modal-title").textContent = `Promotion History — ${member.handle}`;
+  renderPromoModal();
+  $("promo-modal").classList.add("open");
+}
+function closePromoModal() {
+  $("promo-modal").classList.remove("open");
+  // re-render parent
+  if (promoTarget.type === "command") renderCommand(); else renderRoster();
+}
+function renderPromoModal() {
+  const member = promoTarget.type === "command" ? bdcData.command[promoTarget.idx] : bdcData.roster[promoTarget.idx];
+  const list = member.promotionHistory || [];
+  let html = "";
+  list.forEach((p, i) => {
+    html += `
+      <div class="promo-row">
+        <div class="field-row">
+          <div><label class="field-label">Date</label><input type="text" value="${esc(p.date || '')}" oninput="updatePromo(${i}, 'date', this.value)" placeholder="May 2026"></div>
+          <div><label class="field-label">From</label><input type="text" value="${esc(p.from || '')}" oninput="updatePromo(${i}, 'from', this.value)" placeholder="Crewman"></div>
+          <div><label class="field-label">To</label><input type="text" value="${esc(p.to || '')}" oninput="updatePromo(${i}, 'to', this.value)" placeholder="Petty Officer"></div>
+        </div>
+        <div><label class="field-label">Note</label><input type="text" value="${esc(p.note || '')}" oninput="updatePromo(${i}, 'note', this.value)"></div>
+        <div style="margin-top:8px;"><button class="btn small danger" onclick="removePromo(${i})">🗑 Remove Entry</button></div>
+      </div>
+    `;
+  });
+  html += `<button class="add-row-btn" onclick="addPromo()">➕ Add Promotion Entry</button>`;
+  $("promo-modal-body").innerHTML = html;
+}
+function updatePromo(i, field, value) {
+  const member = promoTarget.type === "command" ? bdcData.command[promoTarget.idx] : bdcData.roster[promoTarget.idx];
+  member.promotionHistory[i][field] = value;
+}
+function addPromo() {
+  const member = promoTarget.type === "command" ? bdcData.command[promoTarget.idx] : bdcData.roster[promoTarget.idx];
+  if (!member.promotionHistory) member.promotionHistory = [];
+  member.promotionHistory.unshift({ date: "", from: "", to: "", note: "" });
+  renderPromoModal();
+}
+function removePromo(i) {
+  const member = promoTarget.type === "command" ? bdcData.command[promoTarget.idx] : bdcData.roster[promoTarget.idx];
+  member.promotionHistory.splice(i, 1);
+  renderPromoModal();
+}
+
+// ============================================================
+// FULL PROFILE MODAL (divisions, quals list, badges, notes, ops stats)
+// ============================================================
+let profileTarget = null;
+function openProfileModal(type, idx) {
+  profileTarget = { type, idx };
+  const member = type === "command" ? bdcData.command[idx] : bdcData.roster[idx];
+  if (!member.divisions) member.divisions = [];
+  if (!member.qualsList) member.qualsList = [];
+  if (!member.badges) member.badges = [];
+  if (!member.campaignsAttended) member.campaignsAttended = [];
+  $("profile-modal-title").textContent = `Full Profile — ${member.handle}`;
+  renderProfileModal();
+  $("profile-modal").classList.add("open");
+}
+function closeProfileModal() {
+  $("profile-modal").classList.remove("open");
+  if (profileTarget.type === "command") renderCommand(); else renderRoster();
+}
+function getProfileMember() {
+  return profileTarget.type === "command" ? bdcData.command[profileTarget.idx] : bdcData.roster[profileTarget.idx];
+}
+function renderProfileModal() {
+  const m = getProfileMember();
+  $("profile-modal-body").innerHTML = `
+    <div style="margin-bottom:20px;">
+      <label class="field-label">Notes / Bio</label>
+      <textarea id="prof-notes" oninput="getProfileMember().notes = this.value" placeholder="Public-facing note about this member.">${esc(m.notes || '')}</textarea>
+    </div>
+
+    <div class="field-row">
+      <div>
+        <label class="field-label">Ops Attended</label>
+        <input type="number" min="0" value="${m.opsAttended || 0}" oninput="getProfileMember().opsAttended = parseInt(this.value)||0">
+      </div>
+      <div>
+        <label class="field-label">Ops Led</label>
+        <input type="number" min="0" value="${m.opsLed || 0}" oninput="getProfileMember().opsLed = parseInt(this.value)||0">
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="field-label">Divisions <span style="color:var(--text-faint);font-weight:400;">(e.g. Pilot, Marine, Medic, Miner, Trader)</span></label>
+      <div class="list-editor" id="prof-divisions"></div>
+      <button class="add-row-btn" onclick="addProfArrayItem('divisions')" style="margin-top:8px;">➕ Add Division</button>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="field-label">Qualifications <span style="color:var(--text-faint);font-weight:400;">(e.g. Q-DOGFIGHT, Q-TURRET-GUNNER)</span></label>
+      <div class="list-editor" id="prof-qualsList"></div>
+      <button class="add-row-btn" onclick="addProfArrayItem('qualsList')" style="margin-top:8px;">➕ Add Qualification</button>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="field-label">Badges &amp; Honors <span style="color:var(--text-faint);font-weight:400;">(e.g. Founders Mark, Campaign Veteran)</span></label>
+      <div class="list-editor" id="prof-badges"></div>
+      <button class="add-row-btn" onclick="addProfArrayItem('badges')" style="margin-top:8px;">➕ Add Badge</button>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="field-label">Campaigns Attended <span style="color:var(--text-faint);font-weight:400;">(campaign numbers, e.g. 1, 2, 3)</span></label>
+      <div class="list-editor" id="prof-campaignsAttended"></div>
+      <button class="add-row-btn" onclick="addProfArrayItem('campaignsAttended', true)" style="margin-top:8px;">➕ Add Campaign</button>
+    </div>
+  `;
+  renderProfArrayList("divisions");
+  renderProfArrayList("qualsList");
+  renderProfArrayList("badges");
+  renderProfArrayList("campaignsAttended", true);
+}
+function renderProfArrayList(key, isNumber) {
+  const m = getProfileMember();
+  const listEl = $(`prof-${key}`);
+  listEl.innerHTML = "";
+  (m[key] || []).forEach((item, i) => {
+    const row = document.createElement("div");
+    row.className = "list-item";
+    row.innerHTML = `
+      <input type="${isNumber ? 'number' : 'text'}" value="${esc(item)}" oninput="updateProfArrayItem('${key}', ${i}, this.value, ${isNumber})">
+      <button class="btn small danger" onclick="removeProfArrayItem('${key}', ${i})">🗑</button>
+    `;
+    listEl.appendChild(row);
+  });
+}
+function addProfArrayItem(key, isNumber) {
+  const m = getProfileMember();
+  if (!m[key]) m[key] = [];
+  m[key].push(isNumber ? 0 : "");
+  renderProfArrayList(key, isNumber);
+}
+function updateProfArrayItem(key, i, value, isNumber) {
+  const m = getProfileMember();
+  m[key][i] = isNumber ? (parseInt(value) || 0) : value;
+}
+function removeProfArrayItem(key, i) {
+  const m = getProfileMember();
+  m[key].splice(i, 1);
+  // re-render the relevant list
+  const isNumber = key === "campaignsAttended";
+  renderProfArrayList(key, isNumber);
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportTracker() {
+  if (!bdcData) { toast("No data to export", true); return; }
+  if (!originalHTML) {
+    toast("No source HTML loaded. Load an existing tracker first to keep the visual styling.", true);
+    return;
+  }
+  // Update timestamp
+  bdcData.lastUpdated = new Date().toLocaleString("en-US", { month: "short", year: "numeric" });
+
+  // Serialize back to JS object literal
+  const serialized = "const BDC_DATA = " + stringifyJs(bdcData) + ";";
+
+  // Replace in original HTML
+  const newHTML = originalHTML.replace(/const BDC_DATA = \{[\s\S]*?\n\};/, serialized);
+
+  // Download
+  const blob = new Blob([newHTML], { type: "text/html" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "BDC_Org_Tracker.html";
+  link.click();
+  toast("Tracker exported! Share BDC_Org_Tracker.html with the org.");
+}
+
+// Serialize JS-flavored object (cleaner than JSON.stringify for the data file)
+function stringifyJs(obj, indent = "  ") {
+  return JSON.stringify(obj, null, 2);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function esc(s) {
+  return String(s == null ? "" : s).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function toast(msg, isError) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (isError ? " error" : "");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// Close modal on backdrop click
+$("promo-modal").addEventListener("click", (e) => {
+  if (e.target === $("promo-modal")) closePromoModal();
+});
+$("profile-modal").addEventListener("click", (e) => {
+  if (e.target === $("profile-modal")) closeProfileModal();
+});
+// ESC to close modal
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if ($("promo-modal").classList.contains("open")) closePromoModal();
+    if ($("profile-modal").classList.contains("open")) closeProfileModal();
+  }
+});
+</script>
+
+</body>
+</html>
