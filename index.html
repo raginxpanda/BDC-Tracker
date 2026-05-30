@@ -269,7 +269,7 @@
             <div class="section-header">
                 <span class="section-num">[02]</span>
                 <h2>Member Leaderboard</h2>
-                <span class="section-meta">3 of 3 · page 1 of 1 ▸ CLICK ANY ROW FOR MEMBER DETAIL</span>
+                <span class="section-meta" id="roster-counter">Syncing rows... ▸ CLICK ANY ROW FOR MEMBER DETAIL</span>
             </div>
             <div class="roster-controls">
                 <button class="filter-btn active">All</button>
@@ -291,33 +291,11 @@
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="roster-data">
                     <tr>
-                        <td><span class="lb-position top-three">#01</span></td>
-                        <td><span class="rank-badge rank-CRM">Crewman</span></td>
-                        <td><div class="member-cell"><span class="member-bdc-tag">[BDC]</span><span class="handle">BDC_Phat_Panda</span></div></td>
-                        <td class="last-seen-cell">2022</td>
-                        <td class="stars-cell">—</td>
-                        <td class="last-seen-cell">—</td>
-                        <td><span class="status-pill status-active">Active</span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="lb-position top-three">#02</span></td>
-                        <td><span class="rank-badge rank-CRM">Crewman</span></td>
-                        <td><div class="member-cell"><span class="member-bdc-tag">[BDC]</span><span class="handle">Drelcan</span></div></td>
-                        <td class="last-seen-cell">2024</td>
-                        <td class="stars-cell">—</td>
-                        <td class="last-seen-cell">—</td>
-                        <td><span class="status-pill status-active">Active</span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="lb-position top-three">#03</span></td>
-                        <td><span class="rank-badge rank-CRM">Crewman</span></td>
-                        <td><div class="member-cell"><span class="member-bdc-tag">[BDC]</span><span class="handle">Its_a_Travisty</span></div></td>
-                        <td class="last-seen-cell">2025</td>
-                        <td class="stars-cell">—</td>
-                        <td class="last-seen-cell">—</td>
-                        <td><span class="status-pill status-active">Active</span></td>
+                        <td colspan="7" style="text-align:center; color:var(--text-dim); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">
+                            📡 Connecting to Black Diamond Core Database...
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -396,5 +374,59 @@
             <div class="footer-meta">BDC ORG TRACKER · V1.1 · UNCLASSIFIED // FOUO</div>
         </footer>
     </div>
+
+    <!-- DYNAMIC WEB SERVER INTEGRATION SCRIPT -->
+    <script>
+        const API_URL = 'https://api.blkdiamondcorporation.com/api/roster';
+
+        async function loadLiveRoster() {
+            const tbody = document.getElementById('roster-data');
+            const counter = document.getElementById('roster-counter');
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (!data.success || !data.members || data.members.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">📭 No verified crew members found in database.</td></tr>`;
+                    counter.textContent = '0 of 0 · page 1 of 1 ▸ OPERATIONS STANDING BY';
+                    return;
+                }
+
+                // Update section meta header count dynamically
+                const count = data.members.length;
+                counter.textContent = `${count} of ${count} · page 1 of 1 ▸ CLICK ANY ROW FOR MEMBER DETAIL`;
+
+                // Build out the list elements securely
+                tbody.innerHTML = data.members.map((member, index) => {
+                    const cleanRank = (member.rank || 'Crewman').toUpperCase();
+                    const cleanStatus = (member.status || 'Active').toLowerCase();
+                    
+                    return `
+                        <tr>
+                            <td><span class="lb-position ${index < 3 ? 'top-three' : ''}">#${String(index + 1).padStart(2, '0')}</span></td>
+                            <td><span class="rank-badge rank-CRM">${member.rank || 'Crewman'}</span></td>
+                            <td>
+                                <div class="member-cell">
+                                    <span class="member-bdc-tag">[BDC]</span>
+                                    <span class="handle">${member.handle}</span>
+                                </div>
+                            </td>
+                            <td class="last-seen-cell">${member.since || '2026'}</td>
+                            <td class="stars-cell">—</td>
+                            <td class="last-seen-cell">—</td>
+                            <td><span class="status-pill status-${cleanStatus}">${member.status || 'Active'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Tracker Core Connection Error:', err);
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--usmc-red); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">⚠️ Failed to sync with fleet database. Secure link offline.</td></tr>`;
+                counter.textContent = 'LINK ERROR · CONNECTION DISRUPTED';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadLiveRoster);
+    </script>
 </body>
 </html>
