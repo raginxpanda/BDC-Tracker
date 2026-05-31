@@ -260,6 +260,43 @@
         .stat-cell .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
         .stat-cell .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.05em; color: var(--bdc-blue); line-height: 1; }
         .stat-cell .stat-unit { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-left: 4px; }
+
+        /* ORG STATS STRIP — at-a-glance org health under the status banner */
+        .org-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+        .org-stat { background: var(--bg-1); border: 1px solid var(--border); border-left: 3px solid var(--bdc-blue); padding: 16px 20px; }
+        .org-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px; }
+        .org-stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+        .org-stat-value .unit { font-size: 12px; color: var(--text-faint); margin-left: 4px; }
+
+        /* TOP PERFORMERS PANEL */
+        .top-performers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .top-perf-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: 2px; padding: 18px 20px; }
+        .top-perf-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.18em; color: var(--bdc-blue); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+        .top-perf-title .perf-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace; }
+        .top-perf-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; transition: background 0.15s; border-radius: 2px; }
+        .top-perf-row:hover { background: var(--bg-2); padding-left: 8px; padding-right: 8px; margin-left: -8px; margin-right: -8px; }
+        .top-perf-row .perf-medal { font-size: 18px; min-width: 24px; }
+        .top-perf-row .perf-handle { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .top-perf-row .perf-value { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--bdc-blue); letter-spacing: 0.05em; }
+        .top-perf-empty { padding: 12px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-faint); font-style: italic; }
+
+        /* FOOTER SYNC INDICATOR */
+        .footer-sync { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; margin-top: 8px; }
+        .footer-sync .sync-dot { display: inline-block; width: 6px; height: 6px; background: #27ae60; border-radius: 50%; margin-right: 6px; vertical-align: middle; animation: sync-pulse 2s ease-in-out infinite; }
+        .footer-sync.stale .sync-dot { background: #e67e22; animation: none; }
+        @keyframes sync-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* MOBILE — graceful layout on narrow viewports */
+        @media (max-width: 720px) {
+            .org-stats { grid-template-columns: repeat(2, 1fr); }
+            .top-performers { grid-template-columns: 1fr; }
+            .roster-table { font-size: 12px; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-backdrop { padding: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -282,6 +319,26 @@
                 <div class="status-details">Connecting to Carbon-12...</div>
             </div>
             <div class="status-message">Live data loading from the fleet database.</div>
+        </div>
+
+        <!-- ORG STATS — at-a-glance metrics under the status banner -->
+        <div class="org-stats" id="org-stats">
+            <div class="org-stat">
+                <div class="org-stat-label">Verified Members</div>
+                <div class="org-stat-value" id="stat-members">—</div>
+            </div>
+            <div class="org-stat">
+                <div class="org-stat-label">Ships in Fleet</div>
+                <div class="org-stat-value" id="stat-ships">—</div>
+            </div>
+            <div class="org-stat">
+                <div class="org-stat-label">Lifetime Ops</div>
+                <div class="org-stat-value" id="stat-ops">—</div>
+            </div>
+            <div class="org-stat">
+                <div class="org-stat-label">aUEC Distributed</div>
+                <div class="org-stat-value" id="stat-payouts">—</div>
+            </div>
         </div>
 
         <!-- COMMAND SECTION -->
@@ -361,10 +418,42 @@
             </div>
         </section>
 
-        <!-- HONORS & RECOGNITION -->
+        <!-- TOP PERFORMERS — quick recognition + scouting tool for leadership -->
         <section class="section">
             <div class="section-header">
                 <span class="section-num">[03]</span>
+                <h2>Top Performers</h2>
+                <span class="section-meta">Live ranking</span>
+            </div>
+            <div class="top-performers">
+                <div class="top-perf-card">
+                    <div class="top-perf-title">
+                        <span>⚡ Ops Attended</span>
+                        <span class="perf-label">LIFETIME</span>
+                    </div>
+                    <div id="perf-ops"></div>
+                </div>
+                <div class="top-perf-card">
+                    <div class="top-perf-title">
+                        <span>💰 aUEC Earned</span>
+                        <span class="perf-label">LIFETIME</span>
+                    </div>
+                    <div id="perf-payouts"></div>
+                </div>
+                <div class="top-perf-card">
+                    <div class="top-perf-title">
+                        <span>🛳️ Hangar Size</span>
+                        <span class="perf-label">SHIPS</span>
+                    </div>
+                    <div id="perf-ships"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HONORS & RECOGNITION -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-num">[04]</span>
                 <h2>Honors & Recognition</h2>
                 <span class="section-meta">Permanent record</span>
             </div>
@@ -376,7 +465,7 @@
         <!-- CAMPAIGN LOG SECTION -->
         <section class="section">
             <div class="section-header">
-                <span class="section-num">[04]</span>
+                <span class="section-num">[05]</span>
                 <h2>Campaign Log</h2>
                 <span class="section-meta">Operational history</span>
             </div>
@@ -395,6 +484,9 @@
             <div class="stripes"></div>
             <div class="footer-motto">MISSION FIRST. SAFETY ALWAYS.</div>
             <div class="footer-meta">BDC ORG TRACKER · V1.2 · POWERED BY CARBON-12</div>
+            <div class="footer-sync" id="footer-sync">
+                <span class="sync-dot"></span><span id="sync-text">CONNECTING…</span>
+            </div>
         </footer>
     </div>
 
@@ -796,6 +888,15 @@
                 });
             }
 
+            // Top-performer row clicks — open the same member modal.
+            document.querySelectorAll('.top-perf-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const row = e.target.closest('.top-perf-row[data-handle]');
+                    if (!row) return;
+                    openMemberModal(row.dataset.handle);
+                });
+            });
+
             const search = document.querySelector('.roster-search');
             if (search) {
                 search.addEventListener('input', (e) => {
@@ -829,6 +930,96 @@
             });
         }
 
+        // ---------- org stats (at-a-glance numbers under the status banner) ----------
+        function renderOrgStats(snap) {
+            const s = snap?.stats ?? {};
+            const fmt = (n) => Number(n ?? 0).toLocaleString('en-US');
+            const fmtCompact = (n) => {
+                const num = Number(n ?? 0);
+                if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+                if (num >= 10_000)    return `${Math.round(num / 1000)}K`;
+                if (num >= 1000)      return `${(num / 1000).toFixed(1)}K`;
+                return num.toString();
+            };
+            $('stat-members').innerHTML  = fmt(s.verifiedCount);
+            $('stat-ships').innerHTML    = fmt(s.totalShipsOwned);
+            $('stat-ops').innerHTML      = fmt(s.totalLifetimeOps);
+            $('stat-payouts').innerHTML  = `${fmtCompact(s.totalLifetimePayoutsAuec)}<span class="unit">aUEC</span>`;
+        }
+
+        // ---------- top performers (mini leaderboards) ----------
+        function renderTopPerformers() {
+            const medals = ['🥇', '🥈', '🥉'];
+            const fmtAuec = (n) => Number(n || 0).toLocaleString('en-US');
+
+            function rankBy(field, fmtVal, emptyMsg) {
+                const ranked = [...state.roster]
+                    .filter(m => Number(m[field] ?? 0) > 0)
+                    .sort((a, b) => Number(b[field] ?? 0) - Number(a[field] ?? 0))
+                    .slice(0, 3);
+                if (ranked.length === 0) {
+                    return `<div class="top-perf-empty">${emptyMsg}</div>`;
+                }
+                return ranked.map((m, i) => `
+                    <div class="top-perf-row" data-handle="${escapeHtml(m.handle)}">
+                        <span class="perf-medal">${medals[i]}</span>
+                        <span class="perf-handle">${escapeHtml(m.handle)}</span>
+                        <span class="perf-value">${fmtVal(m[field])}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Ships: rank by hangar length (already expanded by quantity).
+            function rankByShips() {
+                const ranked = [...state.roster]
+                    .filter(m => (m.hangar?.length ?? 0) > 0)
+                    .sort((a, b) => (b.hangar?.length ?? 0) - (a.hangar?.length ?? 0))
+                    .slice(0, 3);
+                if (ranked.length === 0) {
+                    return `<div class="top-perf-empty">No ships logged yet — members can add via /hangar add.</div>`;
+                }
+                return ranked.map((m, i) => `
+                    <div class="top-perf-row" data-handle="${escapeHtml(m.handle)}">
+                        <span class="perf-medal">${medals[i]}</span>
+                        <span class="perf-handle">${escapeHtml(m.handle)}</span>
+                        <span class="perf-value">${m.hangar.length}</span>
+                    </div>
+                `).join('');
+            }
+
+            $('perf-ops').innerHTML      = rankBy('totalOpsAttended', (n) => `${n}`, 'No ops attended yet — campaign starting soon.');
+            $('perf-payouts').innerHTML  = rankBy('totalPayoutsAuec', (n) => `${fmtAuec(n)}`, 'No payouts yet — first op pending.');
+            $('perf-ships').innerHTML    = rankByShips();
+        }
+
+        // ---------- footer sync indicator ----------
+        function updateSyncIndicator(isoTs) {
+            const footer = $('footer-sync');
+            const text = $('sync-text');
+            if (!isoTs) {
+                footer.classList.add('stale');
+                text.textContent = 'NO DATA';
+                return;
+            }
+            const ageMs = Date.now() - new Date(isoTs).getTime();
+            const ageS = Math.floor(ageMs / 1000);
+            let label;
+            if (ageS < 5)        label = 'JUST NOW';
+            else if (ageS < 60)  label = `${ageS}s AGO`;
+            else if (ageS < 3600) label = `${Math.floor(ageS / 60)}m AGO`;
+            else                  label = `${Math.floor(ageS / 3600)}h AGO`;
+            // Snapshot regenerates every ~30s on the bot. Mark stale if
+            // we haven't gotten a fresh one in 3+ minutes (bot probably
+            // down or Railway redeploying).
+            if (ageMs > 3 * 60_000) {
+                footer.classList.add('stale');
+                text.textContent = `LIVE SNAPSHOT · UPDATED ${label} · STALE`;
+            } else {
+                footer.classList.remove('stale');
+                text.textContent = `LIVE SNAPSHOT · UPDATED ${label}`;
+            }
+        }
+
         // ---------- top-level sync ----------
         async function syncFromBot() {
             try {
@@ -842,11 +1033,15 @@
                 state.shipRoles = snap.shipRoles ?? {};
                 state.currentCampaign = snap.currentCampaign ?? null;
                 state.campaignHistory = snap.campaignHistory ?? [];
+                state.lastUpdated = snap.lastUpdated;
 
                 updateStatusBanner(state.currentCampaign);
+                renderOrgStats(snap);
                 renderRoster();
+                renderTopPerformers();
                 renderHonorsAccordion();
                 renderCampaignLog();
+                updateSyncIndicator(state.lastUpdated);
 
                 // Hydrate any open modal so promotions/awards land in place.
                 if (state.openModalHandle) openMemberModal(state.openModalHandle);
@@ -878,6 +1073,10 @@
             syncFromBot();
         });
         setInterval(syncFromBot, 60_000);
+        // Update the "Updated Xs ago" indicator every 10s without
+        // hitting the network — uses state.lastUpdated which is set on
+        // each successful syncFromBot.
+        setInterval(() => updateSyncIndicator(state.lastUpdated), 10_000);
     </script>
 
     <!-- MEMBER DETAIL MODAL — populated on roster row click -->
