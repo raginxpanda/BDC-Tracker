@@ -199,6 +199,67 @@
         .list-items li { list-style: none; padding: 8px 12px; background: var(--bg-3); border-left: 2px solid var(--bdc-blue); font-size: 13px; color: var(--text); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em; }
         .list-items li.empty { border-left-color: var(--border); color: var(--text-faint); font-style: italic; font-family: 'Sora', sans-serif; }
         .animations { animation: fade-up 0.6s ease-out backwards; }
+
+        /* ROSTER ROWS — clickable */
+        .roster-table tbody tr { cursor: pointer; transition: background 0.15s; }
+        .roster-table tbody tr:hover { background: rgba(0, 172, 238, 0.06); }
+
+        /* SHIP TAGS (used in modal hangar + role-coded coloring) */
+        .ship-tag { display: inline-block; padding: 4px 10px; margin: 3px 4px 3px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; border: 1px solid; border-radius: 2px; background: rgba(0, 0, 0, 0.25); white-space: nowrap; }
+        .ship-tag.combat       { color: #ff7070; border-color: rgba(255, 112, 112, 0.45); }
+        .ship-tag.bomber       { color: #ff7070; border-color: rgba(255, 112, 112, 0.45); }
+        .ship-tag.interdiction { color: #ff7070; border-color: rgba(255, 112, 112, 0.45); }
+        .ship-tag.boarding     { color: #ff7070; border-color: rgba(255, 112, 112, 0.45); }
+        .ship-tag.mining       { color: #ffb84d; border-color: rgba(255, 184, 77, 0.45); }
+        .ship-tag.salvage      { color: #ffb84d; border-color: rgba(255, 184, 77, 0.45); }
+        .ship-tag.industrial   { color: #ffb84d; border-color: rgba(255, 184, 77, 0.45); }
+        .ship-tag.construction { color: #ffb84d; border-color: rgba(255, 184, 77, 0.45); }
+        .ship-tag.medical      { color: #4dd56e; border-color: rgba(77, 213, 110, 0.45); }
+        .ship-tag.refueling    { color: #4dd56e; border-color: rgba(77, 213, 110, 0.45); }
+        .ship-tag.repair       { color: #4dd56e; border-color: rgba(77, 213, 110, 0.45); }
+        .ship-tag.exploration  { color: #b566ff; border-color: rgba(181, 102, 255, 0.45); }
+        .ship-tag.science      { color: #b566ff; border-color: rgba(181, 102, 255, 0.45); }
+        .ship-tag.data         { color: #b566ff; border-color: rgba(181, 102, 255, 0.45); }
+        .ship-tag.cargo        { color: #00ACEE; border-color: rgba(0, 172, 238, 0.45); }
+        .ship-tag.carrier      { color: #00ACEE; border-color: rgba(0, 172, 238, 0.45); }
+        .ship-tag.passenger    { color: #00ACEE; border-color: rgba(0, 172, 238, 0.45); }
+        .ship-tag.general      { color: var(--text-dim); border-color: var(--border-bright); }
+        .ship-tag.racing       { color: var(--text-dim); border-color: var(--border-bright); }
+        .ship-tag.stealth      { color: var(--text-dim); border-color: var(--border-bright); }
+        .ship-tag.starter      { color: var(--text-dim); border-color: var(--border-bright); }
+
+        /* HONORS ACCORDION (replaces the static 6-card grid) */
+        .honors-accordion { display: flex; flex-direction: column; gap: 8px; }
+        .honors-category { background: var(--bg-1); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+        .honors-category-header { padding: 18px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; }
+        .honors-category-header:hover { background: var(--bg-2); }
+        .honors-category-header .cat-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.18em; color: var(--bdc-blue); }
+        .honors-category-header .cat-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-faint); letter-spacing: 0.1em; }
+        .honors-category-header .chevron { font-family: 'JetBrains Mono', monospace; color: var(--bdc-blue); font-size: 14px; transition: transform 0.3s; margin-left: 12px; }
+        .honors-category.open .chevron { transform: rotate(90deg); }
+        .honors-category-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
+        .honors-category.open .honors-category-body { max-height: 4000px; }
+        .honors-category-inner { padding: 0 24px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .medal-entry { padding: 12px 14px; background: var(--bg-2); border-left: 2px solid var(--bdc-blue-dim); border-radius: 0 2px 2px 0; position: relative; }
+        .medal-entry[data-has-holders="true"] { border-left-color: var(--bdc-blue); }
+        .medal-entry .medal-name { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.15em; color: var(--text); margin-bottom: 6px; cursor: help; }
+        .medal-entry .medal-holders { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--bdc-blue); line-height: 1.6; }
+        .medal-entry .medal-holders.empty { color: var(--text-faint); font-style: italic; }
+        .medal-entry[title]:hover { background: var(--bg-3); }
+
+        /* MODAL — promotion timeline */
+        .timeline { display: flex; flex-direction: column; gap: 10px; }
+        .timeline-entry { padding: 10px 14px; background: var(--bg-2); border-left: 2px solid var(--bdc-blue); border-radius: 0 2px 2px 0; }
+        .timeline-entry .t-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; margin-bottom: 4px; }
+        .timeline-entry .t-change { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.12em; color: var(--text); }
+        .timeline-entry .t-note { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 4px; font-style: italic; }
+
+        /* MODAL — stat grid */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        .stat-cell { padding: 12px 14px; background: var(--bg-2); border-radius: 2px; border: 1px solid var(--border); }
+        .stat-cell .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+        .stat-cell .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.05em; color: var(--bdc-blue); line-height: 1; }
+        .stat-cell .stat-unit { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-left: 4px; }
     </style>
 </head>
 <body>
@@ -307,34 +368,8 @@
                 <h2>Honors & Recognition</h2>
                 <span class="section-meta">Permanent record</span>
             </div>
-            <div class="honors-grid" id="honors-grid">
-                <div class="honor-card">
-                    <div class="honor-title">🏅 Founders Mark</div>
-                    <ul class="honor-list">
-                        <li><span>RaginXPanda</span><span class="honor-mark">◆</span></li>
-                        <li><span>BDC_Narwhal_OG</span><span class="honor-mark">◆</span></li>
-                    </ul>
-                </div>
-                <div class="honor-card">
-                    <div class="honor-title">🏅 Campaign Veterans · 5+ Stars</div>
-                    <ul class="honor-list"><li class="empty">Earned at 5 Campaign Service Stars</li></ul>
-                </div>
-                <div class="honor-card">
-                    <div class="honor-title">🏅 Standard Bearers · 10+ Stars</div>
-                    <ul class="honor-list"><li class="empty">Earned at 10 Campaign Service Stars</li></ul>
-                </div>
-                <div class="honor-card">
-                    <div class="honor-title">🎖️ Recent Promotions</div>
-                    <ul class="honor-list"><li class="empty">None yet — first campaign pending</li></ul>
-                </div>
-                <div class="honor-card">
-                    <div class="honor-title">🌟 Member of the Campaign</div>
-                    <ul class="honor-list"><li class="empty">Awarded at campaign close-out</li></ul>
-                </div>
-                <div class="honor-card">
-                    <div class="honor-title">🌟 Heart of BDC</div>
-                    <ul class="honor-list"><li class="empty">Voted by full members</li></ul>
-                </div>
+            <div class="honors-accordion" id="honors-accordion">
+                <div style="padding: 40px; text-align: center; color: var(--text-faint); font-family: 'JetBrains Mono'; font-size: 12px;">Loading honors catalog…</div>
             </div>
         </section>
 
@@ -363,30 +398,48 @@
         </footer>
     </div>
 
-    <!-- LIVE INTEGRATION WITH CARBON-12 BOT
-         Source of truth: api.blkdiamondcorporation.com/orgs/BDC/snapshot.json
-         Populated sections: status banner, roster table, honors grid, campaign log.
-         Static sections preserved: Command card (RaginXPanda + SaintLoneStar bios),
-         status legend, footer. -->
+    <!-- LIVE INTEGRATION WITH CARBON-12 BOT -->
     <script>
         const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
         const COMMAND_HANDLES = new Set(['raginxpanda', 'saintlonestar']);
 
-        function $(id) { return document.getElementById(id); }
+        // Static bios for the Command staff (the bot doesn't track these
+        // since they're hand-curated). Indexed lowercase by handle.
+        const COMMAND_BIOS = {
+            'raginxpanda': { callsign: 'Bamboo · CEO',                bio: 'Founder. Marine veteran. Owns the standard.' },
+            'saintlonestar': { callsign: 'Saint · Executive Officer', bio: 'Appointed by founder. Acting #2 of the org. Carries the standard.' },
+        };
 
+        // Module state so a 60s refresh can hydrate on-screen content
+        // (including any open modal) without ripping it out.
+        const state = {
+            roster: [],
+            medalDefinitions: [],
+            medalCategoryByCode: new Map(),
+            shipRoles: {},
+            currentCampaign: null,
+            campaignHistory: [],
+            search: '',
+            filter: 'all',
+            openModalHandle: null,
+        };
+
+        // ---------- helpers ----------
+        function $(id) { return document.getElementById(id); }
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, (c) => ({
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[c]));
         }
-
         function fmtDate(iso) {
             if (!iso) return '—';
             const d = new Date(iso);
             if (isNaN(d)) return '—';
             return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`;
         }
+        function fmtAuec(n) { return Number(n || 0).toLocaleString('en-US'); }
 
+        // ---------- status banner ----------
         function updateStatusBanner(campaign) {
             const banner = $('status-banner');
             if (!banner) return;
@@ -417,30 +470,47 @@
             }
         }
 
-        function renderRoster(roster, medalCategoryByCode) {
+        // ---------- roster table ----------
+        function applyFilters() {
+            const q = state.search.trim().toLowerCase();
+            const f = state.filter;
+            return state.roster
+                .filter(m => !COMMAND_HANDLES.has((m.handle ?? '').toLowerCase()))
+                .filter(m => {
+                    if (f === 'all') return true;
+                    if (f === 'affiliate') return !!m.affiliate;
+                    return (m.status ?? '').toLowerCase() === f;
+                })
+                .filter(m => {
+                    if (!q) return true;
+                    if ((m.handle ?? '').toLowerCase().includes(q)) return true;
+                    return (m.hangar ?? []).some(s => s.toLowerCase().includes(q));
+                });
+        }
+
+        function renderRoster() {
             const tbody = $('roster-data');
             const counter = $('roster-counter');
-            const visible = roster.filter(m => !COMMAND_HANDLES.has((m.handle ?? '').toLowerCase()));
+            const visible = applyFilters();
+            const total = state.roster.filter(m => !COMMAND_HANDLES.has((m.handle ?? '').toLowerCase())).length;
 
             if (visible.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">📭 No verified crew members yet.</td></tr>`;
-                counter.textContent = '0 of 0 · OPERATIONS STANDING BY';
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">📭 No matches.</td></tr>`;
+                counter.textContent = `0 of ${total} ▸ ADJUST FILTERS`;
                 return;
             }
 
-            counter.textContent = `${visible.length} of ${visible.length} ▸ CLICK ANY ROW FOR MEMBER DETAIL`;
+            counter.textContent = `${visible.length} of ${total} ▸ CLICK ANY ROW FOR MEMBER DETAIL`;
 
             tbody.innerHTML = visible.map((m, i) => {
                 const rankCode  = (m.rank ?? 'CRM').toUpperCase();
-                const rankLabel = m.rankTitle ?? rankCode;
                 const awards    = m.awards ?? [];
                 const stars     = awards.length;
-                const quals     = awards.filter(a => medalCategoryByCode.get(a.code) === 'C').length;
+                const quals     = awards.filter(a => state.medalCategoryByCode.get(a.code) === 'C').length;
                 const status    = (m.status ?? 'active').toLowerCase();
                 const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-
                 return `
-                    <tr>
+                    <tr data-handle="${escapeHtml(m.handle)}">
                         <td><span class="lb-position ${i < 3 ? 'top-three' : ''}">#${String(i + 1).padStart(2, '0')}</span></td>
                         <td><span class="rank-badge rank-${rankCode}">${escapeHtml(rankCode)}</span></td>
                         <td>
@@ -458,87 +528,86 @@
             }).join('');
         }
 
-        function renderHonors(roster, medalDefinitions) {
-            const grid = $('honors-grid');
-            if (!grid) return;
+        // ---------- honors accordion ----------
+        function renderHonorsAccordion() {
+            const root = $('honors-accordion');
+            if (!root) return;
+            const defs = state.medalDefinitions ?? [];
+            if (defs.length === 0) {
+                root.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-faint);">No medal catalog available.</div>`;
+                return;
+            }
 
-            // Index awards by medal code → list of holder handles.
             const holdersByCode = new Map();
-            for (const m of roster) {
+            for (const m of state.roster) {
                 for (const a of (m.awards ?? [])) {
                     if (!holdersByCode.has(a.code)) holdersByCode.set(a.code, []);
                     holdersByCode.get(a.code).push(m.handle);
                 }
             }
 
-            // Featured cards (matches the static layout — these are the categories
-            // people scan for). The rest of the honors catalog is browsable via
-            // /award catalog in Discord.
-            const featured = [
-                { code: 'FOUNDERS_MARK',         emoji: '🏅', title: 'Founders Mark' },
-                { code: 'CAMPAIGN_VETERAN',      emoji: '🏅', title: 'Campaign Veterans · 5+ Stars' },
-                { code: 'STANDARD_BEARER',       emoji: '🏅', title: 'Standard Bearers · 10+ Stars' },
-                { code: 'MEMBER_OF_CAMPAIGN',    emoji: '🌟', title: 'Member of the Campaign' },
-                { code: 'HEART_OF_BDC',          emoji: '🌟', title: 'Heart of BDC' },
-                { code: 'ORDER_OF_DIAMOND',      emoji: '💎', title: 'Order of the Diamond' },
-            ];
+            const byCategory = new Map();
+            for (const m of defs) {
+                if (!byCategory.has(m.category)) byCategory.set(m.category, { name: m.categoryName, medals: [] });
+                byCategory.get(m.category).medals.push(m);
+            }
 
-            // Card 1-6: the featured honors. Plus a Recent Promotions card derived
-            // from each member's promotion history.
-            const cards = featured.map(f => {
-                const holders = holdersByCode.get(f.code) ?? [];
-                const items = holders.length === 0
-                    ? `<li class="empty">— none yet —</li>`
-                    : holders.map(h => `<li><span>${escapeHtml(h)}</span><span class="honor-mark">◆</span></li>`).join('');
+            const sorted = [...byCategory.entries()].sort(([a], [b]) => a.localeCompare(b));
+            root.innerHTML = sorted.map(([cat, group], idx) => {
+                const totalHolders = group.medals.reduce((acc, m) => acc + (holdersByCode.get(m.code)?.length ?? 0), 0);
+                const inner = group.medals.map(m => {
+                    const holders = holdersByCode.get(m.code) ?? [];
+                    const hasHolders = holders.length > 0;
+                    const holdersHtml = hasHolders
+                        ? holders.map(h => `◆ ${escapeHtml(h)}`).join('<br>')
+                        : '— none yet —';
+                    const tooltip = escapeHtml(m.description ?? '');
+                    return `
+                        <div class="medal-entry" data-has-holders="${hasHolders}" title="${tooltip}">
+                            <div class="medal-name">${escapeHtml(m.name)}${m.stackable ? ' ✕' : ''}${m.autoAward ? ' 🤖' : ''}</div>
+                            <div class="medal-holders ${hasHolders ? '' : 'empty'}">${holdersHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+                const openClass = idx === 0 ? ' open' : '';
                 return `
-                    <div class="honor-card">
-                        <div class="honor-title">${f.emoji} ${escapeHtml(f.title)}</div>
-                        <ul class="honor-list">${items}</ul>
+                    <div class="honors-category${openClass}">
+                        <div class="honors-category-header" data-cat="${cat}">
+                            <span class="cat-label">[${cat}] ${escapeHtml(group.name)}</span>
+                            <span class="cat-count">${group.medals.length} medals · ${totalHolders} earned <span class="chevron">▸</span></span>
+                        </div>
+                        <div class="honors-category-body">
+                            <div class="honors-category-inner">${inner}</div>
+                        </div>
                     </div>
                 `;
+            }).join('');
+
+            root.addEventListener('click', (e) => {
+                const header = e.target.closest('.honors-category-header');
+                if (!header) return;
+                header.parentElement.classList.toggle('open');
             });
-
-            // Recent promotions: walk every member's promotionHistory, flatten,
-            // sort newest first, take top 5.
-            const allPromos = [];
-            for (const m of roster) {
-                for (const p of (m.promotionHistory ?? [])) {
-                    allPromos.push({ handle: m.handle, ...p });
-                }
-            }
-            allPromos.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const recent = allPromos.slice(0, 5);
-            const promoItems = recent.length === 0
-                ? `<li class="empty">No promotions logged yet</li>`
-                : recent.map(p => `<li><span>${escapeHtml(p.handle)} → ${escapeHtml(p.to ?? '?')}</span><span class="honor-mark">${fmtDate(p.date)}</span></li>`).join('');
-            cards.push(`
-                <div class="honor-card">
-                    <div class="honor-title">🎖️ Recent Promotions</div>
-                    <ul class="honor-list">${promoItems}</ul>
-                </div>
-            `);
-
-            grid.innerHTML = cards.join('');
         }
 
-        function renderCampaignLog(currentCampaign, history) {
+        // ---------- campaign log ----------
+        function renderCampaignLog() {
             const log = $('campaign-log');
             if (!log) return;
             const all = [];
-            if (currentCampaign) {
+            if (state.currentCampaign) {
                 all.push({
-                    id: currentCampaign.id,
-                    name: currentCampaign.name,
-                    startedAt: currentCampaign.startedAt,
+                    id: state.currentCampaign.id,
+                    name: state.currentCampaign.name,
+                    startedAt: state.currentCampaign.startedAt,
                     endedAt: null,
                     status: 'active',
                 });
             }
-            for (const c of (history ?? [])) {
-                if (currentCampaign && c.id === currentCampaign.id) continue;
+            for (const c of state.campaignHistory) {
+                if (state.currentCampaign && c.id === state.currentCampaign.id) continue;
                 all.push(c);
             }
-
             if (all.length === 0) {
                 log.innerHTML = `
                     <div class="campaign-row">
@@ -550,7 +619,6 @@
                 `;
                 return;
             }
-
             log.innerHTML = all.map((c, i) => {
                 const num = String(all.length - i).padStart(2, '0');
                 const range = c.endedAt
@@ -568,27 +636,198 @@
             }).join('');
         }
 
+        // ---------- member detail modal ----------
+        function shipRoleClass(shipName) {
+            const role = state.shipRoles?.[shipName] || 'general';
+            return role.toLowerCase();
+        }
+
+        function findMemberByHandle(handle) {
+            const target = handle.toLowerCase();
+            return state.roster.find(m => (m.handle ?? '').toLowerCase() === target);
+        }
+
+        function openMemberModal(handle) {
+            const m = findMemberByHandle(handle);
+            if (!m) return;
+            state.openModalHandle = handle;
+
+            const rankCode = (m.rank ?? 'CRM').toUpperCase();
+            const rankColorVar = `var(--rank-${rankCode.toLowerCase()})`;
+            const bioBlock = COMMAND_BIOS[handle.toLowerCase()];
+
+            const stats = `
+                <div class="stat-grid">
+                    <div class="stat-cell">
+                        <div class="stat-label">Lifetime Ops</div>
+                        <div class="stat-value">${m.totalOpsAttended ?? 0}</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="stat-label">Current Campaign</div>
+                        <div class="stat-value">${m.currentCampaignOps ?? 0}<span class="stat-unit">ops</span></div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="stat-label">aUEC Earned</div>
+                        <div class="stat-value">${fmtAuec(m.totalPayoutsAuec)}</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="stat-label">Awards</div>
+                        <div class="stat-value">${(m.awards ?? []).length}</div>
+                    </div>
+                </div>
+            `;
+
+            let awardsBlock = '';
+            if ((m.awards ?? []).length > 0) {
+                const defByCode = new Map(state.medalDefinitions.map(d => [d.code, d]));
+                const byCat = new Map();
+                for (const a of m.awards) {
+                    const def = defByCode.get(a.code);
+                    if (!def) continue;
+                    if (!byCat.has(def.category)) byCat.set(def.category, []);
+                    byCat.get(def.category).push({ a, def });
+                }
+                const catLines = [...byCat.entries()]
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([cat, items]) => {
+                        const li = items.map(({ def, a }) => {
+                            const auto = a.isAuto ? ' 🤖' : '';
+                            return `<div title="${escapeHtml(def.description ?? '')}" style="padding: 6px 0; cursor: help;">◆ <strong>${escapeHtml(def.name)}</strong>${auto}${a.reason ? ` <span style="color:var(--text-dim);font-style:italic;font-size:11px">— ${escapeHtml(a.reason)}</span>` : ''}</div>`;
+                        }).join('');
+                        return `<div style="margin-bottom: 12px;"><div style="font-family:'JetBrains Mono';font-size:10px;color:var(--bdc-blue);letter-spacing:0.2em;margin-bottom:4px;">CATEGORY ${cat}</div>${li}</div>`;
+                    }).join('');
+                awardsBlock = `
+                    <div class="modal-section">
+                        <div class="modal-section-title">🎖️ Awards · ${m.awards.length}</div>
+                        ${catLines}
+                    </div>
+                `;
+            }
+
+            let hangarBlock = '';
+            if ((m.hangar ?? []).length > 0) {
+                const tags = m.hangar.map(s => `<span class="ship-tag ${shipRoleClass(s)}">${escapeHtml(s)}</span>`).join('');
+                hangarBlock = `
+                    <div class="modal-section">
+                        <div class="modal-section-title">🛳️ Hangar · ${m.hangar.length} ship${m.hangar.length === 1 ? '' : 's'}</div>
+                        <div>${tags}</div>
+                    </div>
+                `;
+            }
+
+            let timelineBlock = '';
+            const promos = m.promotionHistory ?? [];
+            if (promos.length > 0) {
+                const entries = [...promos].reverse().map(p => `
+                    <div class="timeline-entry">
+                        <div class="t-date">${fmtDate(p.date)}</div>
+                        <div class="t-change">${escapeHtml(p.from ?? '—')} → ${escapeHtml(p.to ?? '?')}</div>
+                        ${p.note ? `<div class="t-note">${escapeHtml(p.note)}</div>` : ''}
+                    </div>
+                `).join('');
+                timelineBlock = `
+                    <div class="modal-section">
+                        <div class="modal-section-title">📈 Rank History</div>
+                        <div class="timeline">${entries}</div>
+                    </div>
+                `;
+            }
+
+            $('member-modal').style.setProperty('--rank-color', rankColorVar);
+            $('member-modal-body').innerHTML = `
+                <div class="modal-header">
+                    <div class="bdc-tag">[BDC]${bioBlock ? ' · ' + escapeHtml(bioBlock.callsign.toUpperCase()) : ''}</div>
+                    <div class="handle">${escapeHtml(m.handle)}</div>
+                    <div class="meta-row">
+                        <span class="rank-badge rank-${rankCode}">${escapeHtml(rankCode)} · ${escapeHtml(m.rankTitle ?? rankCode)}</span>
+                        <span class="status-pill status-${escapeHtml((m.status ?? 'active').toLowerCase())}">${escapeHtml((m.status ?? 'Active'))}</span>
+                        <span class="since">SINCE ${escapeHtml(m.memberSince ?? '—')}</span>
+                    </div>
+                </div>
+                ${bioBlock ? `<div class="modal-section"><div class="modal-section-title">Profile</div><div style="color:var(--text);line-height:1.6;">${escapeHtml(bioBlock.bio)}</div></div>` : ''}
+                <div class="modal-section">
+                    <div class="modal-section-title">Operations · Payouts</div>
+                    ${stats}
+                </div>
+                ${awardsBlock}
+                ${hangarBlock}
+                ${timelineBlock}
+            `;
+            $('member-modal-backdrop').classList.add('open');
+        }
+
+        function closeMemberModal() {
+            $('member-modal-backdrop').classList.remove('open');
+            state.openModalHandle = null;
+        }
+
+        // ---------- controls wiring ----------
+        function wireControls() {
+            $('roster-data').addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-handle]');
+                if (!row) return;
+                openMemberModal(row.dataset.handle);
+            });
+
+            const search = document.querySelector('.roster-search');
+            if (search) {
+                search.addEventListener('input', (e) => {
+                    state.search = e.target.value;
+                    renderRoster();
+                });
+                search.placeholder = 'SEARCH BY HANDLE OR SHIP…';
+            }
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const raw = (btn.textContent || 'All').toLowerCase().trim();
+                    if (raw.startsWith('all')) state.filter = 'all';
+                    else if (raw.startsWith('active')) state.filter = 'active';
+                    else if (raw.startsWith('standby')) state.filter = 'standby';
+                    else if (raw.startsWith('trial')) state.filter = 'trial';
+                    else if (raw.startsWith('affiliate')) state.filter = 'affiliate';
+                    else state.filter = 'all';
+                    renderRoster();
+                });
+            });
+
+            $('member-modal-close').addEventListener('click', closeMemberModal);
+            $('member-modal-backdrop').addEventListener('click', (e) => {
+                if (e.target === $('member-modal-backdrop')) closeMemberModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && state.openModalHandle) closeMemberModal();
+            });
+        }
+
+        // ---------- top-level sync ----------
         async function syncFromBot() {
             try {
                 const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const snap = await res.json();
 
-                const medalCategoryByCode = new Map(
-                    (snap.medalDefinitions ?? []).map(m => [m.code, m.category])
-                );
+                state.roster = snap.roster ?? [];
+                state.medalDefinitions = snap.medalDefinitions ?? [];
+                state.medalCategoryByCode = new Map(state.medalDefinitions.map(m => [m.code, m.category]));
+                state.shipRoles = snap.shipRoles ?? {};
+                state.currentCampaign = snap.currentCampaign ?? null;
+                state.campaignHistory = snap.campaignHistory ?? [];
 
-                updateStatusBanner(snap.currentCampaign ?? null);
-                renderRoster(snap.roster ?? [], medalCategoryByCode);
-                renderHonors(snap.roster ?? [], snap.medalDefinitions ?? []);
-                renderCampaignLog(snap.currentCampaign ?? null, snap.campaignHistory ?? []);
+                updateStatusBanner(state.currentCampaign);
+                renderRoster();
+                renderHonorsAccordion();
+                renderCampaignLog();
+
+                // Hydrate any open modal so promotions/awards land in place.
+                if (state.openModalHandle) openMemberModal(state.openModalHandle);
             } catch (err) {
                 console.error('[tracker] sync error:', err);
                 const tbody = $('roster-data');
                 const counter = $('roster-counter');
-                if (tbody) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--usmc-red); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">⚠️ Failed to sync with fleet database (${escapeHtml(err.message)}).</td></tr>`;
-                }
+                if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--usmc-red); font-family:'JetBrains Mono'; font-size:12px; padding: 24px 0;">⚠️ Failed to sync with fleet database (${escapeHtml(err.message)}).</td></tr>`;
                 if (counter) counter.textContent = 'LINK ERROR · CONNECTION DISRUPTED';
                 const banner = $('status-banner');
                 if (banner) {
@@ -601,15 +840,25 @@
                             </div>
                             <div class="status-details">CANNOT REACH CARBON-12</div>
                         </div>
-                        <div class="status-message">Could not connect to the fleet database. Showing offline state.</div>
+                        <div class="status-message">Could not connect to the fleet database.</div>
                     `;
                 }
             }
         }
 
-        window.addEventListener('DOMContentLoaded', syncFromBot);
-        // Auto-refresh every 60 seconds so promotions/awards land without a manual reload.
+        window.addEventListener('DOMContentLoaded', () => {
+            wireControls();
+            syncFromBot();
+        });
         setInterval(syncFromBot, 60_000);
     </script>
+
+    <!-- MEMBER DETAIL MODAL — populated on roster row click -->
+    <div class="modal-backdrop" id="member-modal-backdrop">
+        <div class="modal" id="member-modal">
+            <button class="modal-close" id="member-modal-close" aria-label="Close">×</button>
+            <div id="member-modal-body"></div>
+        </div>
+    </div>
 </body>
 </html>
