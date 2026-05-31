@@ -293,7 +293,7 @@
             </div>
             <div class="command-grid">
                 <!-- Fleet Admiral -->
-                <div class="command-card" style="--rank-color: var(--rank-fadm);">
+                <div class="command-card" data-handle="RaginXPanda" style="--rank-color: var(--rank-fadm);">
                     <div class="corner-mark">ACTIVE</div>
                     <div class="rank-stars">★★★★★</div>
                     <div class="rank-title">Fleet Admiral</div>
@@ -302,7 +302,7 @@
                     <div class="bio">Founder. Marine veteran. Owns the standard.</div>
                 </div>
                 <!-- XO -->
-                <div class="command-card" style="--rank-color: var(--rank-adm);">
+                <div class="command-card" data-handle="SaintLoneStar" style="--rank-color: var(--rank-adm);">
                     <div class="corner-mark">ACTIVE</div>
                     <div class="rank-stars">★★★★</div>
                     <div class="rank-title">Admiral / XO</div>
@@ -394,7 +394,7 @@
         <footer class="footer">
             <div class="stripes"></div>
             <div class="footer-motto">MISSION FIRST. SAFETY ALWAYS.</div>
-            <div class="footer-meta">BDC ORG TRACKER · V1.1 · UNCLASSIFIED // FOUO</div>
+            <div class="footer-meta">BDC ORG TRACKER · V1.2 · POWERED BY CARBON-12</div>
         </footer>
     </div>
 
@@ -539,10 +539,25 @@
             }
 
             const holdersByCode = new Map();
+            // Real award holders pulled from the bot's snapshot.
             for (const m of state.roster) {
                 for (const a of (m.awards ?? [])) {
                     if (!holdersByCode.has(a.code)) holdersByCode.set(a.code, []);
-                    holdersByCode.get(a.code).push(m.handle);
+                    holdersByCode.get(a.code).push({ handle: m.handle, honorary: false });
+                }
+            }
+            // Static honorary holders from medals.json — for historical
+            // members. Skip any whose handle already appears as a real
+            // holder (case-insensitive) so they don't duplicate once
+            // they verify and earn the real award.
+            for (const def of defs) {
+                const existing = new Set(
+                    (holdersByCode.get(def.code) ?? []).map(h => (h.handle ?? '').toLowerCase())
+                );
+                for (const handle of (def.honoraryHolders ?? [])) {
+                    if (existing.has(handle.toLowerCase())) continue;
+                    if (!holdersByCode.has(def.code)) holdersByCode.set(def.code, []);
+                    holdersByCode.get(def.code).push({ handle, honorary: true });
                 }
             }
 
@@ -559,7 +574,7 @@
                     const holders = holdersByCode.get(m.code) ?? [];
                     const hasHolders = holders.length > 0;
                     const holdersHtml = hasHolders
-                        ? holders.map(h => `◆ ${escapeHtml(h)}`).join('<br>')
+                        ? holders.map(h => `◆ ${escapeHtml(h.handle)}${h.honorary ? ' <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.1em;">· HONORARY</span>' : ''}`).join('<br>')
                         : '— none yet —';
                     const tooltip = escapeHtml(m.description ?? '');
                     return `
@@ -763,11 +778,23 @@
 
         // ---------- controls wiring ----------
         function wireControls() {
+            // Roster table row clicks.
             $('roster-data').addEventListener('click', (e) => {
                 const row = e.target.closest('tr[data-handle]');
                 if (!row) return;
                 openMemberModal(row.dataset.handle);
             });
+
+            // Command card clicks (FA + XO, kept in static markup since
+            // their bios are hand-curated). Delegated from the grid.
+            const cmdGrid = document.querySelector('.command-grid');
+            if (cmdGrid) {
+                cmdGrid.addEventListener('click', (e) => {
+                    const card = e.target.closest('.command-card[data-handle]');
+                    if (!card) return;
+                    openMemberModal(card.dataset.handle);
+                });
+            }
 
             const search = document.querySelector('.roster-search');
             if (search) {
