@@ -237,9 +237,105 @@
         .honors-category-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
         .honors-category.open .honors-category-body { max-height: 4000px; }
         .honors-category-inner { padding: 0 24px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .medal-entry { padding: 12px 14px; background: var(--bg-2); border-left: 2px solid var(--bdc-blue-dim); border-radius: 0 2px 2px 0; position: relative; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+        .medal-entry { padding: 12px 14px; background: var(--bg-2); border-left: 2px solid var(--bdc-blue-dim); border-radius: 0 2px 2px 0; position: relative; cursor: pointer; transition: background 0.15s, transform 0.1s; display: flex; align-items: center; gap: 12px; }
         .medal-entry:hover { background: var(--bg-3); transform: translateX(2px); }
         .medal-entry[data-has-holders="true"] { border-left-color: var(--bdc-blue); }
+        .medal-entry .medal-thumb {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+        }
+        /* Category-themed thumbnail backdrops — match the card gradient palette */
+        .medal-entry .medal-thumb[data-cat="A"] { background: radial-gradient(circle at 50% 30%, #2a3a5c 0%, #0c1422 80%); }
+        .medal-entry .medal-thumb[data-cat="B"] { background: radial-gradient(circle at 50% 30%, #4a201a 0%, #170707 80%); }
+        .medal-entry .medal-thumb[data-cat="C"] { background: radial-gradient(circle at 50% 30%, #134043 0%, #050f10 80%); }
+        .medal-entry .medal-thumb[data-cat="D"] { background: radial-gradient(circle at 50% 30%, #1d3a26 0%, #060f08 80%); }
+        .medal-entry .medal-thumb[data-cat="E"] { background: radial-gradient(circle at 50% 30%, #2e1948 0%, #0a0413 80%); }
+        .medal-entry .medal-thumb[data-cat="F"] { background: radial-gradient(circle at 50% 30%, #303030 0%, #0d0d0d 80%); }
+        .medal-entry .medal-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        /* ---- Tier device overlay system ----
+         * Used in the member modal's per-medal display. The wrapper holds the
+         * base medal PNG; .medal-device is absolutely positioned to sit
+         * centered on the cloth ribbon. Widths are per-device because the
+         * devices have very different aspect ratios (single star vs laurel
+         * wreath vs tall diamond). Values match the locked mockup-v8 spec. */
+        .medal-art-wrap {
+            position: relative;
+            width: 64px; height: 64px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .medal-art-wrap img.medal-base {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .medal-art-wrap img.medal-device {
+            position: absolute;
+            top: 14.5%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.85));
+            z-index: 2;
+            pointer-events: none;
+        }
+        /* Per-device widths — same as mockup-v8 */
+        .medal-art-wrap img.dev-Bronze_1  { width: 17%; }
+        .medal-art-wrap img.dev-Bronze_2  { width: 32%; }
+        .medal-art-wrap img.dev-Bronze_3  { width: 25%; }
+        .medal-art-wrap img.dev-Silver_1  { width: 17%; }
+        .medal-art-wrap img.dev-Silver_2  { width: 25%; }
+        .medal-art-wrap img.dev-Silver_3  { width: 25%; }
+        .medal-art-wrap img.dev-Diamond_1 { width: 18%; }
+        .medal-art-wrap img.dev-Diamond_2 { width: 21%; }
+        .medal-art-wrap img.dev-Diamond_3 { width: 22%; }
+
+        /* Member-modal award row using the medal-art-wrap on the left */
+        .award-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            cursor: help;
+        }
+        .award-row .award-text { flex: 1; min-width: 0; }
+        .award-row .award-name { font-weight: 600; }
+        .award-row .award-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--bdc-blue);
+            margin-left: 6px;
+            letter-spacing: 0.1em;
+        }
+        .award-row .award-tier {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            padding: 1px 6px;
+            border-radius: 2px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .award-tier.tier-bronze  { background: rgba(205,127,50,.18); color: #cd7f32; }
+        .award-tier.tier-silver  { background: rgba(200,208,220,.15); color: #c8d0dc; }
+        .award-tier.tier-diamond { background: rgba(158,201,255,.20); color: #9ec9ff; }
+        .award-row .award-reason {
+            color: var(--text-dim); font-style: italic; font-size: 11px;
+        }
+        .medal-entry .medal-body { flex: 1; min-width: 0; }
         .medal-entry .medal-name { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.15em; color: var(--text); margin-bottom: 6px; }
         .medal-entry .medal-holders { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--bdc-blue); line-height: 1.6; }
         .medal-entry .medal-holders.empty { color: var(--text-faint); font-style: italic; }
@@ -452,6 +548,20 @@
             transform: translateZ(20px);
         }
         .medal-card .card-hero-svg svg { width: 100%; height: 100%; display: block; }
+        .medal-card .card-hero-img {
+            position: relative;
+            width: 94%;
+            max-width: 240px;
+            aspect-ratio: 1;
+            filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.6));
+            transform: translateZ(20px);
+        }
+        .medal-card .card-hero-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
 
         /* Title block */
         .medal-card .card-title {
@@ -1021,11 +1131,18 @@
             }
 
             const holdersByCode = new Map();
-            // Real award holders pulled from the bot's snapshot.
+            // Real award holders pulled from the bot's snapshot. The bot
+            // emits one award row per grant, so for stackable medals a
+            // member appears multiple times. We collapse to one row per
+            // handle with a count so the UI can show "RaginXPanda × 3".
             for (const m of state.roster) {
+                const counts = new Map();
                 for (const a of (m.awards ?? [])) {
-                    if (!holdersByCode.has(a.code)) holdersByCode.set(a.code, []);
-                    holdersByCode.get(a.code).push({ handle: m.handle, honorary: false });
+                    counts.set(a.code, (counts.get(a.code) ?? 0) + 1);
+                }
+                for (const [code, count] of counts) {
+                    if (!holdersByCode.has(code)) holdersByCode.set(code, []);
+                    holdersByCode.get(code).push({ handle: m.handle, count, honorary: false });
                 }
             }
             // Static honorary holders from medals.json — for historical
@@ -1056,13 +1173,27 @@
                     const holders = holdersByCode.get(m.code) ?? [];
                     const hasHolders = holders.length > 0;
                     const holdersHtml = hasHolders
-                        ? holders.map(h => `◆ ${escapeHtml(h.handle)}${h.honorary ? ' <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.1em;">· HONORARY</span>' : ''}`).join('<br>')
+                        ? holders.map(h => {
+                            const count = h.count ?? 1;
+                            const countSuffix = (m.stackable && count > 1) ? ` × ${count}` : '';
+                            const { tier } = (m.stackable && count > 1) ? pickDevice(count) : { tier: null };
+                            const tierSuffix = tier ? ` <span style="color:var(--bdc-blue);font-size:9px;letter-spacing:0.15em;">[${tier.toUpperCase()}]</span>` : '';
+                            const honoraryNote = h.honorary ? ' <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.1em;">· HONORARY</span>' : '';
+                            return `◆ ${escapeHtml(h.handle)}${countSuffix}${tierSuffix}${honoraryNote}`;
+                        }).join('<br>')
                         : '— none yet —';
+                    const catArt = MEDAL_CATEGORY_ART[m.category] ?? MEDAL_CATEGORY_ART.F;
+                    const thumb = MEDAL_IMG_AVAILABLE.has(m.code)
+                        ? `<img src="assets/medals-v2/${m.code}.png" alt="" loading="lazy">`
+                        : catArt.emoji;
                     return `
                         <div class="medal-entry" data-has-holders="${hasHolders}" data-medal-code="${escapeHtml(m.code)}">
-                            <div class="medal-hint">DETAILS ▸</div>
-                            <div class="medal-name">${escapeHtml(m.name)}${m.stackable ? ' ✕' : ''}${m.autoAward ? ' 🤖' : ''}</div>
-                            <div class="medal-holders ${hasHolders ? '' : 'empty'}">${holdersHtml}</div>
+                            <div class="medal-thumb" data-cat="${escapeHtml(m.category)}">${thumb}</div>
+                            <div class="medal-body">
+                                <div class="medal-hint">DETAILS ▸</div>
+                                <div class="medal-name">${escapeHtml(m.name)}${m.stackable ? ' ✕' : ''}${m.autoAward ? ' 🤖' : ''}</div>
+                                <div class="medal-holders ${hasHolders ? '' : 'empty'}">${holdersHtml}</div>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -1173,19 +1304,56 @@
             let awardsBlock = '';
             if ((m.awards ?? []).length > 0) {
                 const defByCode = new Map(state.medalDefinitions.map(d => [d.code, d]));
-                const byCat = new Map();
+                // Group awards by code: for stackable medals the bot pushes
+                // multiple award objects with the same code (one per grant).
+                // Collapse to one row per medal with the count + reasons.
+                const byCode = new Map();
                 for (const a of m.awards) {
                     const def = defByCode.get(a.code);
                     if (!def) continue;
-                    if (!byCat.has(def.category)) byCat.set(def.category, []);
-                    byCat.get(def.category).push({ a, def });
+                    if (!byCode.has(a.code)) {
+                        byCode.set(a.code, { def, awards: [] });
+                    }
+                    byCode.get(a.code).awards.push(a);
                 }
+
+                // Then group by category for the section dividers.
+                const byCat = new Map();
+                for (const { def, awards } of byCode.values()) {
+                    if (!byCat.has(def.category)) byCat.set(def.category, []);
+                    byCat.get(def.category).push({ def, awards });
+                }
+
                 const catLines = [...byCat.entries()]
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([cat, items]) => {
-                        const li = items.map(({ def, a }) => {
-                            const auto = a.isAuto ? ' 🤖' : '';
-                            return `<div title="${escapeHtml(def.description ?? '')}" style="padding: 6px 0; cursor: help;">◆ <strong>${escapeHtml(def.name)}</strong>${auto}${a.reason ? ` <span style="color:var(--text-dim);font-style:italic;font-size:11px">— ${escapeHtml(a.reason)}</span>` : ''}</div>`;
+                        const li = items.map(({ def, awards }) => {
+                            const count = awards.length;
+                            const isAuto = awards.some(a => a.isAuto);
+                            const auto = isAuto ? ' 🤖' : '';
+                            const stackable = !!def.stackable;
+                            const art = renderMedalArt(def.code, count, stackable);
+                            const countLabel = (stackable && count > 1)
+                                ? `<span class="award-count">× ${count}</span>` : '';
+                            const { tier } = stackable ? pickDevice(count) : { tier: null };
+                            const tierBadge = tier
+                                ? `<span class="award-tier tier-${tier.toLowerCase()}">${tier}</span>` : '';
+                            // Combine reasons from all the grants for the title attr.
+                            const reasons = awards.map(a => a.reason).filter(Boolean);
+                            const reasonText = reasons.length
+                                ? `<div class="award-reason">— ${escapeHtml(reasons[reasons.length - 1])}</div>`
+                                : '';
+                            const titleAttr = escapeHtml(def.description ?? '');
+                            return `
+                                <div class="award-row" title="${titleAttr}">
+                                    ${art}
+                                    <div class="award-text">
+                                        <div>
+                                            <span class="award-name">${escapeHtml(def.name)}</span>${auto}${countLabel}${tierBadge}
+                                        </div>
+                                        ${reasonText}
+                                    </div>
+                                </div>`;
                         }).join('');
                         return `<div style="margin-bottom: 12px;"><div style="font-family:'JetBrains Mono';font-size:10px;color:var(--bdc-blue);letter-spacing:0.2em;margin-bottom:4px;">CATEGORY ${cat}</div>${li}</div>`;
                     }).join('');
@@ -1468,10 +1636,65 @@
 </svg>`.trim(),
         };
 
+        // Every medal code we've shipped a raster badge for under
+        // assets/medals/<CODE>.png. Source: Gemini Nano Banana 2 generations,
+        // hand-curated to a cohesive cracked-metal-on-space set. Used as
+        // the primary hero art; the SVG + emoji paths are kept as
+        // graceful fallbacks for any future medal that doesn't yet have
+        // a finished badge.
+        const MEDAL_IMG_AVAILABLE = new Set([
+            'ACE_OF_CAMPAIGN', 'BREACHER', 'BUREAU_OF_LOGISTICS',
+            'CAMPAIGN_SERVICE_STAR', 'CAMPAIGN_VETERAN', 'CROSS_GAME_CAPTAIN',
+            'DEEP_SPACE_VANGUARD', 'DRILL_SERGEANT', 'DROPMASTER',
+            'ELITE_WINGS', 'EQUALIZER', 'FIRST_IN_LAST_OUT', 'FIRST_WAVE',
+            'FORGE_MASTER', 'FOUNDERS_MARK', 'GUARDIAN_MEDAL',
+            'HEART_OF_BDC', 'IRON_HULL', 'IRON_WILL',
+            'MEMBER_OF_CAMPAIGN', 'ORDER_OF_DIAMOND', 'RECRUITER',
+            'STANDARD_BEARER', 'THE_LIGHTHOUSE', 'TITAN_GRADE',
+            'TOP_HOOK', 'VANGUARD_MEDIA',
+        ]);
+
+        /**
+         * Tier overlay: which device + tier label to show given how many
+         * times a member has earned a stackable medal.
+         *   1×        → no device (base ribbon only)
+         *   2× – 4×   → Bronze_1 / Bronze_2 / Bronze_3
+         *   5× – 7×   → Silver_1 / Silver_2 / Silver_3
+         *   8× – 10×  → Diamond_1 / Diamond_2 / Diamond_3
+         *   11+       → caps at Diamond_3
+         * Non-stackable medals always show the base ribbon.
+         */
+        function pickDevice(count) {
+            if (!Number.isFinite(count) || count <= 1) return { device: null, tier: null };
+            if (count <= 4)  return { device: `Bronze_${count - 1}`,  tier: 'Bronze'  };
+            if (count <= 7)  return { device: `Silver_${count - 4}`,  tier: 'Silver'  };
+            if (count <= 10) return { device: `Diamond_${count - 7}`, tier: 'Diamond' };
+            return { device: 'Diamond_3', tier: 'Diamond' };
+        }
+
+        /**
+         * Render the full medal art block for one award: base PNG +
+         * (optionally) tier device overlaid on the ribbon. Returns HTML
+         * suitable to drop into a flex row.
+         */
+        function renderMedalArt(code, count, stackable) {
+            if (!MEDAL_IMG_AVAILABLE.has(code)) {
+                // Fallback to category emoji if we somehow lack the PNG.
+                return `<div class="medal-art-wrap" style="font-size:32px;display:flex;align-items:center;justify-content:center;">🎖️</div>`;
+            }
+            const base = `<img class="medal-base" src="assets/medals-v2/${code}.png" alt="" loading="lazy">`;
+            if (!stackable) return `<div class="medal-art-wrap">${base}</div>`;
+            const { device } = pickDevice(count);
+            const overlay = device
+                ? `<img class="medal-device dev-${device}" src="assets/medals-v2/devices/${device}.png" alt="">`
+                : '';
+            return `<div class="medal-art-wrap">${base}${overlay}</div>`;
+        }
+
+
         /**
          * Build a portrait trading-card representation of a medal.
-         * Holo treatment removed per design feedback — category color
-         * theme is enough visual differentiation.
+         * Hero art preference: PNG badge → custom SVG → category emoji.
          */
         function renderMedalCard(def, holderCount) {
             const cat = def.category ?? 'F';
@@ -1483,9 +1706,16 @@
             const footer = holderCount > 0
                 ? `◆ ${holderCount} HOLDER${holderCount === 1 ? '' : 'S'}`
                 : `◇ NO HOLDERS YET`;
-            const heroArt = MEDAL_ART_SVG[def.code]
-                ? `<div class="card-hero-svg">${MEDAL_ART_SVG[def.code]}</div>`
-                : `<div class="card-hero-emoji">${art.emoji}</div>`;
+
+            let heroArt;
+            if (MEDAL_IMG_AVAILABLE.has(def.code)) {
+                heroArt = `<div class="card-hero-img"><img src="assets/medals-v2/${def.code}.png" alt="${escapeHtml(def.name)}" loading="lazy"></div>`;
+            } else if (MEDAL_ART_SVG[def.code]) {
+                heroArt = `<div class="card-hero-svg">${MEDAL_ART_SVG[def.code]}</div>`;
+            } else {
+                heroArt = `<div class="card-hero-emoji">${art.emoji}</div>`;
+            }
+
             return `
                 <div class="medal-card-wrap">
                     <div class="${classes}">
