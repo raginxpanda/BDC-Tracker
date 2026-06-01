@@ -335,6 +335,33 @@
         .award-row .award-reason {
             color: var(--text-dim); font-style: italic; font-size: 11px;
         }
+        .award-row .award-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-faint);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .award-row .award-meta .award-rarity-rare    { color: #e8652b; }   /* safety orange - rare */
+        .award-row .award-meta .award-rarity-uncommon{ color: #ffb84d; }   /* amber - uncommon */
+        .award-row .award-meta .award-rarity-common  { color: var(--text-faint); }
+        .award-honorary {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            padding: 1px 6px;
+            border-radius: 2px;
+            margin-left: 6px;
+            vertical-align: middle;
+            background: rgba(232, 101, 43, 0.18);
+            color: #e8652b;
+        }
+        .awards-list {
+            display: flex; flex-direction: column; gap: 2px;
+        }
         .medal-entry .medal-body { flex: 1; min-width: 0; }
         .medal-entry .medal-name { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.15em; color: var(--text); margin-bottom: 6px; }
         .medal-entry .medal-holders { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--bdc-blue); line-height: 1.6; }
@@ -1280,6 +1307,45 @@
             const rankColorVar = `var(--rank-${rankCode.toLowerCase()})`;
             const bioBlock = COMMAND_BIOS[handle.toLowerCase()];
 
+            // ---- Build effective awards list (real + honorary) ---------
+            // The bot only tracks real /award grants in m.awards. Honorary
+            // holders live on the medal definitions (e.g. RaginXPanda and
+            // NarwhaL on Founders Mark). For the member modal, surface both
+            // so a member's profile reflects everything they hold.
+            const handleLower = (m.handle ?? '').toLowerCase();
+            const realAwards = m.awards ?? [];
+            const realCodes = new Set(realAwards.map((a) => a.code));
+            const honoraryAwards = [];
+            for (const def of (state.medalDefinitions ?? [])) {
+                const isHonorary = (def.honoraryHolders ?? [])
+                    .some((h) => (h ?? '').toLowerCase() === handleLower);
+                // Skip if they already have a real grant — real always wins.
+                if (isHonorary && !realCodes.has(def.code)) {
+                    honoraryAwards.push({ code: def.code, isHonorary: true });
+                }
+            }
+            const allAwards = [...realAwards, ...honoraryAwards];
+
+            // ---- Org-wide unique holder counts (for rarity sort) -------
+            // Per medal: number of distinct handles that hold it (real or
+            // honorary). Smaller number = rarer medal, displayed first.
+            const orgHoldersByCode = new Map();
+            for (const r of state.roster) {
+                const seen = new Set();
+                for (const a of (r.awards ?? [])) seen.add(a.code);
+                for (const code of seen) {
+                    if (!orgHoldersByCode.has(code)) orgHoldersByCode.set(code, new Set());
+                    orgHoldersByCode.get(code).add((r.handle ?? '').toLowerCase());
+                }
+            }
+            for (const def of (state.medalDefinitions ?? [])) {
+                for (const h of (def.honoraryHolders ?? [])) {
+                    if (!orgHoldersByCode.has(def.code)) orgHoldersByCode.set(def.code, new Set());
+                    orgHoldersByCode.get(def.code).add((h ?? '').toLowerCase());
+                }
+            }
+            const orgHolderCount = (code) => orgHoldersByCode.get(code)?.size ?? 0;
+
             const stats = `
                 <div class="stat-grid">
                     <div class="stat-cell">
@@ -1296,19 +1362,17 @@
                     </div>
                     <div class="stat-cell">
                         <div class="stat-label">Awards</div>
-                        <div class="stat-value">${(m.awards ?? []).length}</div>
+                        <div class="stat-value">${allAwards.length}</div>
                     </div>
                 </div>
             `;
 
             let awardsBlock = '';
-            if ((m.awards ?? []).length > 0) {
+            if (allAwards.length > 0) {
                 const defByCode = new Map(state.medalDefinitions.map(d => [d.code, d]));
-                // Group awards by code: for stackable medals the bot pushes
-                // multiple award objects with the same code (one per grant).
-                // Collapse to one row per medal with the count + reasons.
+                // Collapse stackable duplicates by code.
                 const byCode = new Map();
-                for (const a of m.awards) {
+                for (const a of allAwards) {
                     const def = defByCode.get(a.code);
                     if (!def) continue;
                     if (!byCode.has(a.code)) {
@@ -1317,50 +1381,65 @@
                     byCode.get(a.code).awards.push(a);
                 }
 
-                // Then group by category for the section dividers.
-                const byCat = new Map();
-                for (const { def, awards } of byCode.values()) {
-                    if (!byCat.has(def.category)) byCat.set(def.category, []);
-                    byCat.get(def.category).push({ def, awards });
+                // Sort rare → common by org-wide unique holder count.
+                // Alphabetical tiebreaker keeps the order stable across refreshes.
+                const sortedMedals = [...byCode.values()].sort((a, b) => {
+                    const rA = orgHolderCount(a.def.code);
+                    const rB = orgHolderCount(b.def.code);
+                    if (rA !== rB) return rA - rB;
+                    return a.def.name.localeCompare(b.def.name);
+                });
+
+                // Classify rarity into a small set of bands for color.
+                // Thresholds tuned for an org of ~30-50 active members.
+                function rarityClass(holderCount) {
+                    if (holderCount <= 3)  return 'award-rarity-rare';
+                    if (holderCount <= 10) return 'award-rarity-uncommon';
+                    return 'award-rarity-common';
                 }
 
-                const catLines = [...byCat.entries()]
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([cat, items]) => {
-                        const li = items.map(({ def, awards }) => {
-                            const count = awards.length;
-                            const isAuto = awards.some(a => a.isAuto);
-                            const auto = isAuto ? ' 🤖' : '';
-                            const stackable = !!def.stackable;
-                            const art = renderMedalArt(def.code, count, stackable);
-                            const countLabel = (stackable && count > 1)
-                                ? `<span class="award-count">× ${count}</span>` : '';
-                            const { tier } = stackable ? pickDevice(count) : { tier: null };
-                            const tierBadge = tier
-                                ? `<span class="award-tier tier-${tier.toLowerCase()}">${tier}</span>` : '';
-                            // Combine reasons from all the grants for the title attr.
-                            const reasons = awards.map(a => a.reason).filter(Boolean);
-                            const reasonText = reasons.length
-                                ? `<div class="award-reason">— ${escapeHtml(reasons[reasons.length - 1])}</div>`
-                                : '';
-                            const titleAttr = escapeHtml(def.description ?? '');
-                            return `
-                                <div class="award-row" title="${titleAttr}">
-                                    ${art}
-                                    <div class="award-text">
-                                        <div>
-                                            <span class="award-name">${escapeHtml(def.name)}</span>${auto}${countLabel}${tierBadge}
-                                        </div>
-                                        ${reasonText}
-                                    </div>
-                                </div>`;
-                        }).join('');
-                        return `<div style="margin-bottom: 12px;"><div style="font-family:'JetBrains Mono';font-size:10px;color:var(--bdc-blue);letter-spacing:0.2em;margin-bottom:4px;">CATEGORY ${cat}</div>${li}</div>`;
-                    }).join('');
+                const rows = sortedMedals.map(({ def, awards }) => {
+                    const count = awards.length;
+                    const isHonorary = awards.every((a) => a.isHonorary);
+                    const isAuto     = awards.some((a) => a.isAuto) && !isHonorary;
+                    const stackable  = !!def.stackable && !isHonorary;
+                    const holders    = orgHolderCount(def.code);
+
+                    const art        = renderMedalArt(def.code, count, stackable);
+                    const countLabel = (stackable && count > 1)
+                        ? `<span class="award-count">× ${count}</span>` : '';
+                    const { tier }   = (stackable && count > 1) ? pickDevice(count) : { tier: null };
+                    const tierBadge  = tier ? `<span class="award-tier tier-${tier.toLowerCase()}">${tier}</span>` : '';
+                    const honoBadge  = isHonorary ? `<span class="award-honorary">HONORARY</span>` : '';
+                    const autoBadge  = isAuto ? ' 🤖' : '';
+
+                    const reasons = awards.map((a) => a.reason).filter(Boolean);
+                    const reasonText = reasons.length
+                        ? `<div class="award-reason">— ${escapeHtml(reasons[reasons.length - 1])}</div>`
+                        : '';
+
+                    const rarityCls = rarityClass(holders);
+                    const rosterSize = state.roster.length || 1;
+                    const meta = `CAT ${def.category} · <span class="${rarityCls}">${holders} of ${rosterSize} hold</span>`;
+                    const titleAttr = escapeHtml(def.description ?? '');
+
+                    return `
+                        <div class="award-row" title="${titleAttr}">
+                            ${art}
+                            <div class="award-text">
+                                <div>
+                                    <span class="award-name">${escapeHtml(def.name)}</span>${autoBadge}${countLabel}${tierBadge}${honoBadge}
+                                </div>
+                                <div class="award-meta">${meta}</div>
+                                ${reasonText}
+                            </div>
+                        </div>`;
+                }).join('');
+
                 awardsBlock = `
                     <div class="modal-section">
-                        <div class="modal-section-title">🎖️ Awards · ${m.awards.length}</div>
-                        ${catLines}
+                        <div class="modal-section-title">🎖️ Awards · ${allAwards.length} <span style="color:var(--text-faint);font-size:11px;letter-spacing:0.15em;">· RARE → COMMON</span></div>
+                        <div class="awards-list">${rows}</div>
                     </div>
                 `;
             }
