@@ -42,6 +42,28 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { background: var(--bg-0); color: var(--text); font-family: 'Sora', sans-serif; font-weight: 400; min-height: 100vh; overflow-x: hidden; }
         body { background-image: radial-gradient(ellipse at top, rgba(0, 172, 238, 0.04) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(232, 101, 43, 0.02) 0%, transparent 50%); background-attachment: fixed; }
+
+        /* SCI-FI FRAME DECORATION
+           Fixed to viewport so the BDC logo + diamond emblem stay anchored
+           regardless of scroll position. Auto-width keeps aspect ratio;
+           height fills the viewport. Hidden below 1100px where the strips
+           would compress to unreadable fragments. */
+        .bdc-frame {
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            width: auto;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+        }
+        .bdc-frame-left  { left: 0; }
+        .bdc-frame-right { right: 0; }
+        @media (max-width: 1100px) {
+            .bdc-frame { display: none; }
+        }
+        /* Container above the frames so all interactive content is reachable */
+        .container { position: relative; z-index: 1; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; z-index: 1; mix-blend-mode: overlay; }
         .container { position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; padding: 0 32px; }
 
@@ -55,6 +77,27 @@
         .hero .motto { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.35em; color: var(--bdc-blue); position: relative; display: inline-block; padding: 0 32px; }
         .hero .motto::before, .hero .motto::after { content: '◆'; position: absolute; top: 50%; transform: translateY(-50%); color: var(--bdc-blue-dim); font-size: 8px; }
         .hero .motto::before { left: 0; } .hero .motto::after { right: 0; }
+        .hero .quarters-link {
+            display: inline-block;
+            margin-top: 22px;
+            padding: 10px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            color: var(--bdc-blue);
+            text-decoration: none;
+            border: 1px solid var(--bdc-blue-dim);
+            background: rgba(74, 158, 255, 0.04);
+            transition: all 0.18s ease-out;
+        }
+        .hero .quarters-link:hover {
+            color: #fff;
+            border-color: var(--bdc-blue);
+            background: rgba(74, 158, 255, 0.15);
+            box-shadow: 0 0 24px rgba(74, 158, 255, 0.45), inset 0 0 16px rgba(74, 158, 255, 0.1);
+            transform: translateY(-1px);
+        }
 
         /* STATUS BANNER */
         .status-banner { margin: 32px auto; background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%); border: 1px solid var(--border); border-left: 4px solid var(--standby-slate); padding: 28px 36px; border-radius: 2px; position: relative; overflow: hidden; }
@@ -769,13 +812,18 @@
     </style>
 </head>
 <body>
+    <!-- Sci-fi frame decoration · fixed to viewport, hides on mobile. See .bdc-frame CSS. -->
+    <img class="bdc-frame bdc-frame-left"  src="assets/frame/frame-left.jpg"  alt="" aria-hidden="true">
+    <img class="bdc-frame bdc-frame-right" src="assets/frame/frame-right.jpg" alt="" aria-hidden="true">
+
     <div class="container">
         <!-- HERO -->
         <header class="hero">
             <img class="bdc-logo" src="bdc-logo.png" alt="Black Diamond Corporation"/>
             <h1>BLACK DIAMOND <span class="accent">CORPORATION</span></h1>
             <div class="tagline">Star Citizen Organization · Est. 2018</div>
-            <div class="motto">Strength · Discipline · Diamond</div>
+            <div class="motto">Forged in the Dark · Unbreakable in the Light</div>
+            <a class="quarters-link" href="quarters.html">▸ ENTER MY QUARTERS</a>
         </header>
 
         <!-- STATUS BANNER -->
@@ -1298,10 +1346,57 @@
             return state.roster.find(m => (m.handle ?? '').toLowerCase() === target);
         }
 
-        function openMemberModal(handle) {
+        // ---------- URL routing for shareable deep links ----------
+        // Hash format:
+        //   #m/<handle>            → opens that member's modal
+        //   #medal/<CODE>          → opens that medal's detail modal
+        //   (empty)                → closes any open modal
+        //
+        // Uses replaceState so opening/closing modals doesn't pollute
+        // browser history with one entry per click. Pasted/bookmarked
+        // links and back/forward still work via the hashchange listener.
+        function setHash(newHash) {
+            const url = newHash
+                ? `${window.location.pathname}${window.location.search}#${newHash}`
+                :  window.location.pathname + window.location.search;
+            history.replaceState({}, '', url);
+        }
+
+        function routeFromHash() {
+            const h = window.location.hash.slice(1);
+            if (!h) {
+                if (state.openModalHandle) closeMemberModal(false);
+                if (state.openMedalCode)  closeMedalModal(false);
+                return;
+            }
+            const slash = h.indexOf('/');
+            if (slash < 0) return;
+            const type = h.slice(0, slash);
+            const id   = h.slice(slash + 1);
+            if (!id) return;
+
+            if (type === 'm') {
+                const target = state.roster.find(
+                    (m) => (m.handle ?? '').toLowerCase() === id.toLowerCase(),
+                );
+                if (!target) return;
+                if (state.openMedalCode) closeMedalModal(false);
+                openMemberModal(target.handle, false);
+            } else if (type === 'medal') {
+                const code = id.toUpperCase();
+                if (!state.medalDefinitions.find((m) => m.code === code)) return;
+                if (state.openModalHandle) closeMemberModal(false);
+                openMedalModal(code, false);
+            }
+        }
+
+        window.addEventListener('hashchange', routeFromHash);
+
+        function openMemberModal(handle, updateUrl = true) {
             const m = findMemberByHandle(handle);
             if (!m) return;
             state.openModalHandle = handle;
+            if (updateUrl) setHash(`m/${(handle ?? '').toLowerCase()}`);
 
             const rankCode = (m.rank ?? 'CRM').toUpperCase();
             const rankColorVar = `var(--rank-${rankCode.toLowerCase()})`;
@@ -1502,16 +1597,18 @@
             $('member-modal-backdrop').classList.add('open');
         }
 
-        function closeMemberModal() {
+        function closeMemberModal(updateUrl = true) {
             $('member-modal-backdrop').classList.remove('open');
             state.openModalHandle = null;
+            if (updateUrl) setHash('');
         }
 
         // ---------- medal detail modal ----------
-        function openMedalModal(code) {
+        function openMedalModal(code, updateUrl = true) {
             const def = state.medalDefinitions.find(m => m.code === code);
             if (!def) return;
             state.openMedalCode = code;
+            if (updateUrl) setHash(`medal/${code}`);
 
             // Collect every holder of this medal (real + honorary) with
             // grant timestamps so we can find the chronological first-3.
@@ -1815,9 +1912,10 @@
             `;
         }
 
-        function closeMedalModal() {
+        function closeMedalModal(updateUrl = true) {
             $('medal-modal-backdrop').classList.remove('open');
             state.openMedalCode = null;
+            if (updateUrl) setHash('');
         }
 
         // ---------- controls wiring ----------
@@ -2046,6 +2144,14 @@
                 // Hydrate any open modal so promotions/awards land in place.
                 if (state.openModalHandle) openMemberModal(state.openModalHandle);
                 if (state.openMedalCode)   openMedalModal(state.openMedalCode);
+
+                // First sync only: honor any #m/<handle> or #medal/<CODE>
+                // already in the URL — supports deep-linked entry from
+                // a pasted/bookmarked link.
+                if (!state.routedOnce) {
+                    state.routedOnce = true;
+                    routeFromHash();
+                }
             } catch (err) {
                 console.error('[tracker] sync error:', err);
                 const tbody = $('roster-data');
