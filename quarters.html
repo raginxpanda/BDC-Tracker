@@ -232,6 +232,28 @@
       border-color: var(--bdc-blue);
       box-shadow: var(--glow-blue);
     }
+    .hud-switch {
+      position: absolute;
+      top: 56px; right: 18px;
+      pointer-events: auto;
+      z-index: 5;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--text-faint);
+      text-decoration: none;
+      padding: 5px 12px;
+      border: 1px solid var(--panel-border);
+      background: rgba(8, 11, 17, 0.55);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .hud-switch:hover {
+      color: var(--safety-orange);
+      border-color: var(--safety-orange);
+      box-shadow: 0 0 14px rgba(232, 101, 43, 0.4);
+    }
 
     /* ============ MODAL ============ */
     .modal-host {
@@ -327,6 +349,138 @@
       letter-spacing: 0.2em;
       color: var(--text-faint);
       background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* ============ BOOT OVERLAY (loading / picker / error) ============ */
+    .boot-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.94);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .boot-overlay.hidden { display: none; }
+    .boot-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      max-width: 460px;
+      width: 100%;
+      box-shadow:
+        0 0 1px rgba(74, 158, 255, 0.4),
+        0 0 40px rgba(74, 158, 255, 0.15),
+        0 20px 60px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+    .boot-panel::before, .boot-panel::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border: 2px solid var(--bdc-blue);
+    }
+    .boot-panel::before {
+      top: -2px; left: -2px;
+      border-right: none; border-bottom: none;
+    }
+    .boot-panel::after {
+      bottom: -2px; right: -2px;
+      border-left: none; border-top: none;
+    }
+    .boot-message {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0 0 18px;
+    }
+    .boot-picker {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0 8px;
+    }
+    .boot-picker input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--panel-border);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 10px 14px;
+      letter-spacing: 0.05em;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .boot-picker input:focus {
+      outline: none;
+      border-color: var(--bdc-blue);
+      box-shadow: 0 0 16px rgba(74, 158, 255, 0.3);
+    }
+    .boot-go {
+      background: rgba(74, 158, 255, 0.12);
+      border: 1px solid var(--bdc-blue);
+      color: var(--bdc-blue);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      padding: 0 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .boot-go:hover {
+      background: rgba(74, 158, 255, 0.25);
+      box-shadow: 0 0 18px rgba(74, 158, 255, 0.4);
+    }
+    .boot-error {
+      padding: 12px 14px;
+      background: rgba(255, 58, 58, 0.08);
+      border-left: 3px solid var(--bdc-red);
+      color: var(--bdc-red);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .boot-help {
+      color: var(--text-faint);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      margin: 14px 0 0;
+    }
+
+    /* ============ AWARDS-BY-CATEGORY CHART (terminal) ============ */
+    .cat-chart { margin: 14px 0 6px; }
+    .cat-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 36px;
+      gap: 10px;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 4px 0;
+    }
+    .cat-row .cat-key {
+      color: var(--bdc-blue);
+      font-weight: 700;
+    }
+    .cat-row .cat-bar {
+      height: 8px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--panel-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .cat-row .cat-bar-fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      background: linear-gradient(90deg, var(--bdc-blue), rgba(74,158,255,0.6));
+      box-shadow: 0 0 8px rgba(74,158,255,0.5);
+    }
+    .cat-row .cat-val {
+      text-align: right;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
     }
 
     /* Modal content shared */
@@ -488,6 +642,7 @@
     <div class="hud-rank" id="hud-rank">▸ FLEET ADMIRAL · BLACKDIAMOND CORP</div>
   </div>
   <a class="hud-link" href="./">← TRACKER</a>
+  <button class="hud-switch" id="hud-switch" type="button" title="Pick a different crew member">↔ SWITCH</button>
 </div>
 
 <div class="mobile-list" id="mobile-list"></div>
@@ -500,7 +655,34 @@
       <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
-    <div class="modal-footer-note" id="modal-footer">PHASE 1 · PLACEHOLDER DATA</div>
+    <div class="modal-footer-note" id="modal-footer">PHASE 2 · LIVE DATA</div>
+  </div>
+</div>
+
+<!-- Boot overlay — shows while snapshot loads, on errors, and as the handle picker if no ?member= in URL or handle isn't found. -->
+<div class="boot-overlay" id="boot-overlay">
+  <div class="boot-panel">
+    <div class="modal-header">
+      <span class="modal-tag" id="boot-tag">[QUARTERS DECK]</span>
+      <div class="modal-title" id="boot-title">Connecting…</div>
+    </div>
+    <div class="modal-body">
+      <p class="boot-message" id="boot-message">Loading roster from Carbon-12…</p>
+      <div class="boot-picker" id="boot-picker" style="display:none;">
+        <input
+          type="text"
+          id="picker-input"
+          list="picker-handles"
+          placeholder="Type your handle…"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <datalist id="picker-handles"></datalist>
+        <button class="boot-go" id="boot-go">ENTER →</button>
+      </div>
+      <div class="boot-error" id="boot-error" style="display:none;"></div>
+      <p class="boot-help" id="boot-help"></p>
+    </div>
   </div>
 </div>
 
@@ -519,23 +701,73 @@
   // identity with the actual signed-in user.
   // ============================================================
 
-  // ---------- placeholder identity (will come from auth in Ph 3) ----------
-  const VIEWER = {
-    handle: 'RaginXPanda',
-    rank: 'FLEET ADMIRAL',
-    rankCode: 'FADM',
-    isOfficer: true,
-    stats: {
-      ops: 0,
-      currentCampaign: 0,
-      auec: 0,
-      awards: 1, // Founders Mark (honorary)
-    },
+  // ---------- snapshot + mutable viewer state -----------------------------
+  const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
+
+  let snapshot = null;                  // org snapshot once loaded
+  let viewer = {                        // resolved from ?member= or picker
+    handle: '—',
+    rank: '—',
+    rankCode: 'CRM',
+    isOfficer: false,
+    member: null,                       // raw roster row, populated after fetch
   };
 
-  // ---------- hotspot definitions ----------
-  // Positions are percentages of the room background. Easy to tune by
-  // editing this single array — no markup or CSS changes needed.
+  // ---------- helpers -----------------------------------------------------
+  function isOfficerRank(rankCode) {
+    return ['LT', 'CAP', 'ADM', 'FADM'].includes((rankCode ?? '').toUpperCase());
+  }
+
+  /** Bronze/Silver/Diamond tier device for a given stack count.
+   *  Same logic as the main tracker so visuals stay consistent. */
+  function pickDevice(count) {
+    if (!Number.isFinite(count) || count <= 1) return { device: null, tier: null };
+    if (count <= 4)  return { device: `Bronze_${count - 1}`,  tier: 'Bronze'  };
+    if (count <= 7)  return { device: `Silver_${count - 4}`,  tier: 'Silver'  };
+    if (count <= 10) return { device: `Diamond_${count - 7}`, tier: 'Diamond' };
+    return { device: 'Diamond_3', tier: 'Diamond' };
+  }
+
+  function findMember(handle) {
+    if (!snapshot || !handle) return null;
+    const q = handle.toLowerCase();
+    return snapshot.roster.find((m) => (m.handle ?? '').toLowerCase() === q) ?? null;
+  }
+
+  /** Build a Map<code, { count, honorary, def }> of medals THIS viewer holds.
+   *  Honorary entries come from medalDefinitions[i].honoraryHolders, real
+   *  grants come from member.awards (one row per grant, aggregated here). */
+  function computeOwnership() {
+    const map = new Map();
+    if (!snapshot || !viewer.member) return map;
+    const handleLower = (viewer.member.handle ?? '').toLowerCase();
+    const defByCode = new Map(snapshot.medalDefinitions.map((d) => [d.code, d]));
+
+    // Real grants: count occurrences of each code in member.awards
+    for (const a of (viewer.member.awards ?? [])) {
+      if (!defByCode.has(a.code)) continue;
+      const prev = map.get(a.code) ?? { count: 0, honorary: false, def: defByCode.get(a.code) };
+      prev.count += 1;
+      map.set(a.code, prev);
+    }
+    // Honorary grants from medal definitions (skip if member has real grant)
+    for (const def of snapshot.medalDefinitions) {
+      const honList = def.honoraryHolders ?? [];
+      const isHonorary = honList.some((h) => (h ?? '').toLowerCase() === handleLower);
+      if (isHonorary && !map.has(def.code)) {
+        map.set(def.code, { count: 0, honorary: true, def });
+      }
+    }
+    return map;
+  }
+
+  function fmtAuec(n) {
+    return Number(n ?? 0).toLocaleString('en-US');
+  }
+
+  // ---------- hotspot definitions -----------------------------------------
+  // Positions are % of room background. Tune one number per row, no other
+  // changes needed. Command Deck is locked unless viewer is an officer.
   const HOTSPOTS = [
     { id: 'medals',   label: 'MEDAL VAULT',    x: 2,  y: 8,  w: 32, h: 52, tone: 'blue'   },
     { id: 'notices',  label: 'BDC NOTICES',    x: 32, y: 13, w: 7,  h: 30, tone: 'red'    },
@@ -544,208 +776,474 @@
     { id: 'terminal', label: 'PERSONAL STATS', x: 76, y: 35, w: 14, h: 33, tone: 'blue'   },
     { id: 'logbook',  label: 'CAMPAIGN LOG',   x: 73, y: 80, w: 16, h: 16, tone: 'orange' },
     { id: 'shelves',  label: 'COLLECTIBLES',   x: 89, y: 10, w: 11, h: 80, tone: 'blue'   },
-    { id: 'command',  label: 'COMMAND DECK',   x: 95, y: 2,  w: 5,  h: 7,  tone: 'red', locked: !VIEWER.isOfficer },
+    { id: 'command',  label: 'COMMAND DECK',   x: 95, y: 2,  w: 5,  h: 7,  tone: 'red',  locked: true },
   ];
 
-  // ---------- modal content builders ----------
-  // Each builder returns { title, tag, body, note } — keeps content
-  // colocated with its hotspot so adding new hotspots is one block.
-
-  const MEDALS_DEMO = [
-    { code: 'FOUNDERS_MARK',         name: 'Founders Mark',        owned: true,  honorary: true,  count: 0 },
-    { code: 'CAMPAIGN_SERVICE_STAR', name: 'Campaign Service Star', owned: false, count: 0 },
-    { code: 'DRILL_SERGEANT',        name: 'Drill Sergeant',        owned: false, count: 0 },
-    { code: 'ACE_OF_CAMPAIGN',       name: 'Ace of the Campaign',   owned: false, count: 0 },
-    { code: 'IRON_HULL',             name: 'Iron Hull',             owned: false, count: 0 },
-    { code: 'HEART_OF_BDC',          name: 'Heart of BDC',          owned: false, count: 0 },
-    { code: 'GUARDIAN_MEDAL',        name: 'Guardian Medal',        owned: false, count: 0 },
-    { code: 'ORDER_OF_DIAMOND',      name: 'Order of the Diamond',  owned: false, count: 0 },
-  ];
-
+  // ---------- modal content builders (using real data) --------------------
   const builders = {
-    medals: () => ({
-      tag: '[01] WALL DISPLAY',
-      title: 'Medal Vault',
-      body: `
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">
-          Every medal earned and unearned. Glowing cells are yours. Click a medal in the live build for full detail + tier device.
+    medals: () => {
+      const ownership = computeOwnership();
+      const defs = snapshot?.medalDefinitions ?? [];
+      const ownedCount = ownership.size;
+
+      const cells = defs.map((def) => {
+        const own = ownership.get(def.code);
+        if (!own) {
+          return `<div class="medal-cell locked" data-medal-code="${def.code}">
+            <img src="assets/medals-v2/${def.code}.png" alt="${def.name}" loading="lazy">
+            <div class="medal-name">${def.name}</div>
+            <div class="medal-status">LOCKED</div>
+          </div>`;
+        }
+        let statusText, deviceOverlay = '';
+        if (own.honorary) {
+          statusText = 'HONORARY';
+        } else {
+          const { device, tier } = pickDevice(own.count);
+          statusText = `× ${own.count}${tier ? ` · ${tier.toUpperCase()}` : ''}`;
+          if (device) {
+            deviceOverlay = `<img src="assets/medals-v2/devices/${device}.png" alt="" style="position:absolute;top:14.5%;left:50%;transform:translate(-50%,-50%);width:38%;pointer-events:none;">`;
+          }
+        }
+        return `<div class="medal-cell owned" data-medal-code="${def.code}">
+          <div style="position:relative;">
+            <img src="assets/medals-v2/${def.code}.png" alt="${def.name}" loading="lazy" style="display:block;">
+            ${deviceOverlay}
+          </div>
+          <div class="medal-name">${def.name}</div>
+          <div class="medal-status">${statusText}</div>
+        </div>`;
+      }).join('');
+
+      return {
+        tag: '[01] WALL DISPLAY',
+        title: `Medal Vault · ${ownedCount} of ${defs.length}`,
+        body: `<p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">
+          Every medal in the org catalog. <span style="color:var(--safety-orange);">Glowing cells</span> are yours.
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--text-faint);margin-top:6px;">▸ CLICK ANY MEDAL FOR DETAILS</span>
         </p>
-        <div class="medal-grid">
-          ${MEDALS_DEMO.map(m => `
-            <div class="medal-cell ${m.owned ? 'owned' : 'locked'}">
-              <img src="assets/medals-v2/${m.code}.png" alt="${m.name}" loading="lazy">
-              <div class="medal-name">${m.name}</div>
-              <div class="medal-status">${m.owned ? (m.honorary ? 'HONORARY' : `× ${m.count}`) : 'LOCKED'}</div>
+        <div class="medal-grid">${cells}</div>`,
+      };
+    },
+
+    medalDetail: (def) => {
+      const own = computeOwnership().get(def.code);
+      const defs = snapshot?.medalDefinitions ?? [];
+
+      // Org-wide rarity: how many people hold this medal (real grants + honoraries)
+      let holderCount = 0;
+      const honList = def.honoraryHolders ?? [];
+      const honSet = new Set(honList.map((h) => (h ?? '').toLowerCase()));
+      const realHolders = new Set();
+      for (const m of (snapshot?.roster ?? [])) {
+        const has = (m.awards ?? []).some((a) => a.code === def.code);
+        if (has) realHolders.add((m.handle ?? '').toLowerCase());
+      }
+      const combined = new Set([...realHolders, ...honSet]);
+      holderCount = combined.size;
+      const rosterSize = (snapshot?.roster ?? []).length || 1;
+      const rarityPct = ((holderCount / rosterSize) * 100).toFixed(0);
+      const rarityLabel =
+        holderCount <= 3 ? 'RARE' :
+        holderCount <= 10 ? 'UNCOMMON' :
+        'COMMON';
+      const rarityColor =
+        rarityLabel === 'RARE'     ? 'var(--safety-orange)' :
+        rarityLabel === 'UNCOMMON' ? '#f5b342' :
+                                     'var(--text-faint)';
+
+      // Tier device for big art (if multi-owned)
+      let bigDeviceOverlay = '';
+      if (own && !own.honorary) {
+        const { device } = pickDevice(own.count);
+        if (device) {
+          bigDeviceOverlay = `<img src="assets/medals-v2/devices/${device}.png" alt="" style="position:absolute;top:14.5%;left:50%;transform:translate(-50%,-50%);width:34%;pointer-events:none;">`;
+        }
+      }
+
+      // Grant history (real grants only — honoraries have no dates)
+      const memberAwards = (viewer.member?.awards ?? []).filter((a) => a.code === def.code);
+      const grantList = memberAwards.length
+        ? `<div style="margin-top:18px;">
+             <div style="font-size:10px;letter-spacing:0.25em;color:var(--text-faint);margin-bottom:8px;">▸ YOUR GRANTS</div>
+             ${memberAwards.map((a) => {
+               const date = a.awarded_at ? new Date(a.awarded_at).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}) : '—';
+               const reason = a.reason ? `<div style="color:var(--text-dim);font-size:11px;line-height:1.5;margin-top:3px;font-style:italic;">"${a.reason}"</div>` : '';
+               return `<div style="padding:8px 12px;background:rgba(0,0,0,0.4);border-left:2px solid var(--bdc-blue);margin-bottom:6px;">
+                 <div style="font-size:11px;letter-spacing:0.1em;color:var(--text);">${date}</div>
+                 ${reason}
+               </div>`;
+             }).join('')}
+           </div>`
+        : (own?.honorary
+            ? `<div style="margin-top:18px;padding:14px;background:rgba(232,101,43,0.08);border-left:3px solid var(--safety-orange);">
+                 <div style="font-size:11px;letter-spacing:0.2em;color:var(--safety-orange);">HONORARY HOLDER</div>
+                 <div style="color:var(--text-dim);font-size:11px;line-height:1.5;margin-top:4px;">No grant date on record — bestowed in recognition outside the standard system.</div>
+               </div>`
+            : '');
+
+      const statusBadge = own
+        ? (own.honorary
+            ? `<span style="padding:4px 10px;background:rgba(232,101,43,0.15);border:1px solid var(--safety-orange);color:var(--safety-orange);font-size:10px;letter-spacing:0.2em;">HONORARY</span>`
+            : `<span style="padding:4px 10px;background:rgba(74,158,255,0.12);border:1px solid var(--bdc-blue);color:var(--bdc-blue);font-size:10px;letter-spacing:0.2em;">× ${own.count} HELD</span>`)
+        : `<span style="padding:4px 10px;background:rgba(0,0,0,0.4);border:1px solid var(--panel-border);color:var(--text-faint);font-size:10px;letter-spacing:0.2em;">LOCKED</span>`;
+
+      return {
+        tag: '[01] MEDAL DETAIL',
+        title: def.name,
+        body: `<button data-action="back-to-vault" style="background:none;border:1px solid var(--panel-border);color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;padding:5px 12px;cursor:pointer;margin-bottom:18px;transition:all 0.15s;">← BACK TO VAULT</button>
+
+          <div style="display:grid;grid-template-columns:160px 1fr;gap:24px;align-items:start;">
+            <div style="position:relative;${own ? '' : 'opacity:0.32;'}">
+              <img src="assets/medals-v2/${def.code}.png" alt="${def.name}" style="width:100%;display:block;">
+              ${bigDeviceOverlay}
             </div>
-          `).join('')}
+            <div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                <span style="padding:4px 10px;background:rgba(0,0,0,0.4);border:1px solid var(--panel-border);color:var(--text-dim);font-size:10px;letter-spacing:0.2em;">CAT ${def.category ?? '?'}</span>
+                <span style="padding:4px 10px;background:rgba(0,0,0,0.4);border:1px solid ${rarityColor};color:${rarityColor};font-size:10px;letter-spacing:0.2em;">${rarityLabel} · ${holderCount}/${rosterSize}</span>
+                ${statusBadge}
+              </div>
+              ${def.description ? `<p style="color:var(--text);font-size:13px;line-height:1.7;margin:0 0 10px;">${def.description}</p>` : ''}
+              ${def.criteria ? `<p style="color:var(--text-dim);font-size:11px;line-height:1.6;margin:0;"><span style="color:var(--text-faint);font-size:10px;letter-spacing:0.2em;">▸ AWARDED FOR</span><br>${def.criteria}</p>` : ''}
+            </div>
+          </div>
+          ${grantList}`,
+      };
+    },
+
+    terminal: () => {
+      const m = viewer.member ?? {};
+      const ownership = computeOwnership();
+      const catCounts = new Map();
+      for (const [, info] of ownership) {
+        const cat = info.def?.category ?? '?';
+        catCounts.set(cat, (catCounts.get(cat) ?? 0) + 1);
+      }
+      const cats = [...catCounts.entries()].sort((a, b) => b[1] - a[1]);
+      const maxCat = Math.max(1, ...cats.map(([, n]) => n));
+      const catBars = cats.length
+        ? cats.map(([cat, n]) => `<div class="cat-row">
+            <span class="cat-key">${cat}</span>
+            <div class="cat-bar"><div class="cat-bar-fill" style="width:${(n / maxCat) * 100}%;"></div></div>
+            <span class="cat-val">${n}</span>
+          </div>`).join('')
+        : `<p style="color:var(--text-faint);font-size:11px;letter-spacing:0.2em;text-align:center;padding:16px;">NO MEDALS YET</p>`;
+
+      const opsLifetime = m.totalOpsAttended ?? 0;
+      const opsCurrent  = m.currentCampaignOps ?? 0;
+      const auec        = m.totalPayoutsAuec ?? 0;
+      const awardCount  = ownership.size;
+
+      return {
+        tag: '[02] PERSONAL TERMINAL',
+        title: 'Service Record',
+        body: `<div class="stat-grid">
+          <div class="stat-cell"><div class="stat-label">Lifetime Ops</div><div class="stat-value">${opsLifetime}</div></div>
+          <div class="stat-cell"><div class="stat-label">Current Campaign</div><div class="stat-value">${opsCurrent}</div></div>
+          <div class="stat-cell"><div class="stat-label">aUEC Earned</div><div class="stat-value">${fmtAuec(auec)}</div></div>
+          <div class="stat-cell"><div class="stat-label">Awards</div><div class="stat-value">${awardCount}</div></div>
         </div>
-      `,
-    }),
-    terminal: () => ({
-      tag: '[02] PERSONAL TERMINAL',
-      title: 'Service Record',
-      body: `
-        <div class="stat-grid">
-          <div class="stat-cell"><div class="stat-label">Lifetime Ops</div><div class="stat-value">${VIEWER.stats.ops}</div></div>
-          <div class="stat-cell"><div class="stat-label">Current Campaign</div><div class="stat-value">${VIEWER.stats.currentCampaign}</div></div>
-          <div class="stat-cell"><div class="stat-label">aUEC Earned</div><div class="stat-value">${VIEWER.stats.auec.toLocaleString()}</div></div>
-          <div class="stat-cell"><div class="stat-label">Awards</div><div class="stat-value">${VIEWER.stats.awards}</div></div>
-        </div>
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.7;margin:0;">
-          Charts coming in Phase 2 — ops over time, payout history, attendance heatmap. Will pull from the live <code style="color:var(--bdc-blue);background:rgba(74,158,255,0.08);padding:1px 6px;border-radius:2px;">/snapshot.json</code> endpoint once we wire it up.
-        </p>
-      `,
-    }),
-    window: () => ({
-      tag: '[03] BRIDGE WINDOW',
-      title: 'Campaign Map',
-      body: `
-        <div style="text-align:center;padding:30px 10px;">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:28px;letter-spacing:0.1em;color:var(--text);margin-bottom:8px;">NO ACTIVE CAMPAIGN</div>
-          <div style="font-size:11px;letter-spacing:0.25em;color:var(--text-faint);">Standby — COMMAND will signal the next deployment.</div>
-        </div>
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:18px 0 0;">
-          Phase 2: when a campaign is active, this becomes an interactive system map. Pin objectives, see fleet positions, signup for ops without leaving Quarters.
-        </p>
-      `,
-    }),
+        <div style="font-size:10px;letter-spacing:0.25em;color:var(--text-faint);margin-top:14px;">▸ AWARDS BY CATEGORY</div>
+        <div class="cat-chart">${catBars}</div>`,
+      };
+    },
+
+    window: () => {
+      const camp = snapshot?.currentCampaign;
+      if (!camp) {
+        return {
+          tag: '[03] BRIDGE WINDOW',
+          title: 'Campaign Map',
+          body: `<div style="text-align:center;padding:30px 10px;">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:28px;letter-spacing:0.1em;color:var(--text);margin-bottom:8px;">NO ACTIVE CAMPAIGN</div>
+            <div style="font-size:11px;letter-spacing:0.25em;color:var(--text-faint);">Standby — COMMAND will signal the next deployment.</div>
+          </div>`,
+        };
+      }
+      return {
+        tag: '[03] BRIDGE WINDOW',
+        title: 'Campaign Map',
+        body: `<div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.06em;color:var(--text);margin-bottom:6px;">${camp.name ?? 'Active Campaign'}</div>
+        <div style="font-size:11px;letter-spacing:0.25em;color:var(--bdc-blue);margin-bottom:18px;">▸ ${(camp.status ?? 'ACTIVE').toUpperCase()}</div>
+        ${camp.description ? `<p style="color:var(--text-dim);font-size:13px;line-height:1.7;">${camp.description}</p>` : ''}
+        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin-top:18px;">Interactive system map arrives in a future phase — for now, sign up via <code style="color:var(--bdc-blue);">/event signup</code> in Discord.</p>`,
+      };
+    },
+
     notices: () => ({
       tag: '[04] BULKHEAD POSTER',
       title: 'BDC Notices',
-      body: `
-        <div style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">BUILT ON DISCIPLINE</div>
+      body: `<div style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">BUILT ON DISCIPLINE</div>
         <div style="font-family:'Rajdhani',sans-serif;font-size:18px;letter-spacing:0.12em;color:var(--bdc-red);margin-bottom:24px;">STRENGTH THROUGH COORDINATION</div>
-        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">
-          BlackDiamond Corporation runs structured operations across Stanton and Pyro. Every member has a role, every operation has a brief, every contribution is logged.
-        </p>
-        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">
-          <strong style="color:var(--text);">Phase 2:</strong> this panel becomes the live announcement board. Officers post via Discord, members read here.
-        </p>
-      `,
+        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">BlackDiamond Corporation runs structured operations across Stanton and Pyro. Every member has a role, every operation has a brief, every contribution is logged.</p>`,
     }),
+
     mission: () => ({
       tag: '[05] MISSION BOARD',
       title: 'Open Operations',
-      body: `
-        <div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">ONE CREW</div>
+      body: `<div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">ONE CREW</div>
         <div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:18px;">ONE PURPOSE</div>
-        <div style="padding:20px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;color:var(--text-faint);font-size:11px;letter-spacing:0.2em;">
-          NO OPS POSTED — CHECK BACK AT 1900 LOCAL
-        </div>
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin-top:18px;">
-          Future feature: list of scheduled events you can signup for inline. Today, signups happen via <code style="color:var(--bdc-blue);">/event signup</code> in Discord.
-        </p>
-      `,
+        <div style="padding:20px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;color:var(--text-faint);font-size:11px;letter-spacing:0.2em;">OPEN OPS LISTING — COMING IN PHASE 2.1</div>
+        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin-top:18px;">Signups happen via <code style="color:var(--bdc-blue);">/event signup</code> in Discord for now.</p>`,
     }),
-    logbook: () => ({
-      tag: '[06] PERSONAL LOG',
-      title: 'Campaign Log Book',
-      body: `
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">
-          A chronological record of every campaign and operation you've participated in.
+
+    logbook: () => {
+      const m = viewer.member ?? {};
+      return {
+        tag: '[06] PERSONAL LOG',
+        title: 'Campaign Log Book',
+        body: `<p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">
+          Chronological record of your participation. Lifetime totals shown below; per-op history wires in once the bot exposes event_id-level data.
         </p>
-        <div style="padding:20px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:22px;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">NO ENTRIES</div>
-          <div style="font-size:10px;letter-spacing:0.2em;color:var(--text-faint);">Logged ops will appear here</div>
-        </div>
-      `,
-    }),
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-label">Lifetime Ops</div><div class="stat-value">${m.totalOpsAttended ?? 0}</div></div>
+          <div class="stat-cell"><div class="stat-label">This Campaign</div><div class="stat-value">${m.currentCampaignOps ?? 0}</div></div>
+          <div class="stat-cell"><div class="stat-label">aUEC Lifetime</div><div class="stat-value">${fmtAuec(m.totalPayoutsAuec)}</div></div>
+        </div>`,
+      };
+    },
+
     shelves: () => ({
       tag: '[07] DISPLAY SHELVING',
       title: 'Collectibles',
-      body: `
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">
-          Reserved for future cosmetic rewards — event commemoratives, milestone trophies, easter eggs from special ops.
-        </p>
+      body: `<p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0 0 16px;">Reserved for future cosmetic rewards — event commemoratives, milestone trophies, easter eggs from special ops.</p>
         <div style="padding:40px 20px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;">
           <div style="font-family:'Rajdhani',sans-serif;font-size:22px;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">SHELF EMPTY</div>
           <div style="font-size:10px;letter-spacing:0.2em;color:var(--text-faint);">Collectibles system not deployed</div>
-        </div>
-      `,
+        </div>`,
     }),
-    command: () => VIEWER.isOfficer ? ({
+
+    command: () => viewer.isOfficer ? ({
       tag: '[08] RESTRICTED',
       title: 'Command Deck',
-      body: `
-        <div style="text-align:center;padding:30px 20px;">
+      body: `<div style="text-align:center;padding:30px 20px;">
           <div style="font-family:'Rajdhani',sans-serif;font-size:28px;letter-spacing:0.1em;color:var(--bdc-blue);text-shadow:0 0 14px rgba(74,158,255,0.5);margin-bottom:10px;">ACCESS GRANTED</div>
-          <div style="font-size:11px;letter-spacing:0.25em;color:var(--text-faint);">Welcome aboard, ${VIEWER.handle}.</div>
+          <div style="font-size:11px;letter-spacing:0.25em;color:var(--text-faint);">Welcome aboard, ${viewer.handle}.</div>
         </div>
-        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:20px;">
-          The Command Deck unlocks officer-only tooling — rank management, medal definitions, honorary holders, org config, member promotions, audit log access.
-        </p>
-        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">
-          <strong style="color:var(--text);">Phase 4:</strong> Currently empty scaffold. Real dashboard arrives once Phase 3 (Discord OAuth) is in place.
-        </p>
-      `,
+        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:20px;">The Command Deck unlocks officer-only tooling — rank management, medal definitions, honorary holders, org config, member promotions, audit log access.</p>
+        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;"><strong style="color:var(--text);">Phase 4:</strong> Currently empty scaffold. Real dashboard arrives once Phase 3 (Discord OAuth) is in place.</p>`,
     }) : ({
       tag: '[!!] RESTRICTED ACCESS',
       title: 'Command Deck',
-      body: `
-        <div class="locked-screen">
+      body: `<div class="locked-screen">
           <div class="icon">🔒</div>
           <div class="deny">ACCESS DENIED</div>
           <div class="reason">OFFICER CLEARANCE REQUIRED</div>
-        </div>
-      `,
+        </div>`,
     }),
   };
 
-  // ---------- render hotspots ----------
-  const hotspotLayer = document.getElementById('hotspot-layer');
-  const mobileList = document.getElementById('mobile-list');
+  // ---------- DOM refs ---------------------------------------------------
+  const hotspotLayer  = document.getElementById('hotspot-layer');
+  const mobileList    = document.getElementById('mobile-list');
+  const modalHost     = document.getElementById('modal-host');
+  const modalTag      = document.getElementById('modal-tag');
+  const modalTitle    = document.getElementById('modal-title');
+  const modalBody     = document.getElementById('modal-body');
+  const bootOverlay   = document.getElementById('boot-overlay');
+  const bootTitle     = document.getElementById('boot-title');
+  const bootMessage   = document.getElementById('boot-message');
+  const bootPicker    = document.getElementById('boot-picker');
+  const bootError     = document.getElementById('boot-error');
+  const bootHelp      = document.getElementById('boot-help');
+  const pickerInput   = document.getElementById('picker-input');
+  const pickerHandles = document.getElementById('picker-handles');
+  const bootGo        = document.getElementById('boot-go');
 
-  for (const h of HOTSPOTS) {
-    // desktop hotspot button
-    const btn = document.createElement('button');
-    btn.className = 'hotspot' + (h.locked ? ' locked' : '');
-    btn.style.left = `${h.x}%`;
-    btn.style.top = `${h.y}%`;
-    btn.style.width = `${h.w}%`;
-    btn.style.height = `${h.h}%`;
-    btn.dataset.hotspot = h.id;
-    btn.dataset.tone = h.tone;
-    btn.setAttribute('aria-label', h.label);
-    btn.innerHTML = `<span class="hotspot-label">${h.label}</span>`;
-    btn.addEventListener('click', () => openHotspot(h.id));
-    hotspotLayer.appendChild(btn);
-
-    // mobile tile
-    const tile = document.createElement('button');
-    tile.className = 'mobile-tile';
-    tile.textContent = (h.locked ? '🔒 ' : '') + h.label;
-    tile.addEventListener('click', () => openHotspot(h.id));
-    mobileList.appendChild(tile);
+  // ---------- render: HUD + hotspots -------------------------------------
+  function renderHUD() {
+    document.getElementById('hud-handle').textContent = viewer.handle.toUpperCase();
+    const officerMark = viewer.isOfficer ? '◆' : '▸';
+    document.getElementById('hud-rank').textContent =
+      `${officerMark} ${viewer.rank.toUpperCase()} · BLACKDIAMOND CORP`;
+    document.title = `${viewer.handle} · BDC Quarters`;
   }
 
-  // ---------- modal control ----------
-  const modalHost   = document.getElementById('modal-host');
-  const modalTag    = document.getElementById('modal-tag');
-  const modalTitle  = document.getElementById('modal-title');
-  const modalBody   = document.getElementById('modal-body');
+  function renderHotspots() {
+    hotspotLayer.innerHTML = '';
+    mobileList.innerHTML = '';
+    for (const h of HOTSPOTS) {
+      const isLocked = h.locked && !viewer.isOfficer;
+      const btn = document.createElement('button');
+      btn.className = 'hotspot' + (isLocked ? ' locked' : '');
+      btn.style.left = `${h.x}%`;
+      btn.style.top = `${h.y}%`;
+      btn.style.width = `${h.w}%`;
+      btn.style.height = `${h.h}%`;
+      btn.dataset.hotspot = h.id;
+      btn.dataset.tone = h.tone;
+      btn.setAttribute('aria-label', h.label);
+      btn.innerHTML = `<span class="hotspot-label">${h.label}</span>`;
+      btn.addEventListener('click', () => openHotspot(h.id));
+      hotspotLayer.appendChild(btn);
 
+      const tile = document.createElement('button');
+      tile.className = 'mobile-tile';
+      tile.textContent = (isLocked ? '🔒 ' : '') + h.label;
+      tile.addEventListener('click', () => openHotspot(h.id));
+      mobileList.appendChild(tile);
+    }
+  }
+
+  // ---------- modal control ----------------------------------------------
   function openHotspot(id) {
     const builder = builders[id];
-    if (!builder) {
-      console.warn(`No builder for hotspot ${id}`);
-      return;
-    }
+    if (!builder) return;
     const content = builder();
     modalTag.textContent = content.tag;
     modalTitle.textContent = content.title;
     modalBody.innerHTML = content.body;
     modalHost.classList.add('open');
   }
-  function closeModal() {
-    modalHost.classList.remove('open');
-  }
+  function closeModal() { modalHost.classList.remove('open'); }
   document.getElementById('modal-close').addEventListener('click', closeModal);
-  modalHost.addEventListener('click', (e) => {
-    if (e.target === modalHost) closeModal();
+  modalHost.addEventListener('click', (e) => { if (e.target === modalHost) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  // Delegated clicks inside the modal body — wires medal-vault → detail
+  // navigation without re-registering listeners on every modal render.
+  modalBody.addEventListener('click', (e) => {
+    // Back to vault button
+    const back = e.target.closest('[data-action="back-to-vault"]');
+    if (back) {
+      openHotspot('medals');
+      return;
+    }
+    // Clicked a medal cell — open its detail view
+    const cell = e.target.closest('.medal-cell[data-medal-code]');
+    if (cell) {
+      const code = cell.dataset.medalCode;
+      const def = (snapshot?.medalDefinitions ?? []).find((d) => d.code === code);
+      if (!def) return;
+      const content = builders.medalDetail(def);
+      modalTag.textContent = content.tag;
+      modalTitle.textContent = content.title;
+      modalBody.innerHTML = content.body;
+    }
   });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+
+  // ---------- boot overlay control ---------------------------------------
+  function showBootLoading() {
+    bootTitle.textContent = 'Connecting…';
+    bootMessage.textContent = 'Loading roster from Carbon-12…';
+    bootMessage.style.display = '';
+    bootPicker.style.display = 'none';
+    bootError.style.display = 'none';
+    bootHelp.textContent = '';
+    bootOverlay.classList.remove('hidden');
+  }
+  function showBootError(msg) {
+    bootTitle.textContent = 'Connection Failed';
+    bootMessage.style.display = 'none';
+    bootPicker.style.display = 'none';
+    bootError.style.display = '';
+    bootError.textContent = msg;
+    bootHelp.innerHTML = '<a href="javascript:location.reload()" style="color:var(--bdc-blue);text-decoration:none;letter-spacing:0.2em;">↻ RETRY</a> · <a href="./" style="color:var(--text-dim);text-decoration:none;letter-spacing:0.2em;">← TRACKER</a>';
+    bootOverlay.classList.remove('hidden');
+  }
+  function showBootPicker(reason) {
+    bootTitle.textContent = 'Select Crew Member';
+    bootMessage.style.display = '';
+    bootMessage.textContent = reason === 'not_found'
+      ? `Handle not in the roster. Pick from the list below.`
+      : `Type or pick your handle to enter your personal quarters.`;
+    bootPicker.style.display = 'flex';
+    bootError.style.display = 'none';
+    bootHelp.innerHTML = '<a href="./" style="color:var(--text-dim);text-decoration:none;letter-spacing:0.2em;">← BACK TO TRACKER</a>';
+    pickerHandles.innerHTML = (snapshot?.roster ?? [])
+      .map((m) => `<option value="${m.handle}">`)
+      .join('');
+    pickerInput.value = '';
+    bootOverlay.classList.remove('hidden');
+    setTimeout(() => pickerInput.focus(), 50);
+  }
+  function hideBootOverlay() { bootOverlay.classList.add('hidden'); }
+
+  function submitPicker() {
+    const handle = (pickerInput.value || '').trim();
+    if (!handle) return;
+    const params = new URLSearchParams();
+    params.set('member', handle.toLowerCase());
+    window.location.search = params.toString();
+  }
+  bootGo.addEventListener('click', submitPicker);
+  pickerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitPicker(); });
+
+  // ---------- resolve viewer + boot --------------------------------------
+  const STORAGE_KEY = 'bdc:lastHandle';
+
+  function saveLastHandle(handle) {
+    try { localStorage.setItem(STORAGE_KEY, (handle ?? '').toLowerCase()); } catch (e) { /* private mode etc. */ }
+  }
+  function readLastHandle() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+  }
+  function clearLastHandle() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+
+  function resolveViewerFromMember(member) {
+    viewer.member = member;
+    viewer.handle = member.handle ?? '—';
+    viewer.rankCode = (member.rank ?? 'CRM').toUpperCase();
+    const tagInfo = (snapshot?.rankTags ?? []).find((r) => r.tag === viewer.rankCode);
+    viewer.rank = tagInfo?.title ?? viewer.rankCode;
+    viewer.isOfficer = isOfficerRank(viewer.rankCode);
+  }
+
+  // Switch button — wipes saved handle + reloads to picker
+  document.getElementById('hud-switch').addEventListener('click', () => {
+    clearLastHandle();
+    window.location.href = window.location.pathname;
   });
+
+  async function init() {
+    showBootLoading();
+    try {
+      const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      snapshot = await res.json();
+    } catch (err) {
+      console.error('snapshot fetch failed', err);
+      showBootError(`Could not load org snapshot: ${err.message}. Check your connection or try again in a moment.`);
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    let handleParam = params.get('member');
+
+    // No URL param? Try the saved handle from a previous visit. If we
+    // have one AND it still resolves, redirect with it in the URL so
+    // the address bar always reflects state. If saved handle is stale
+    // (member left the org), clear it and fall through to the picker.
+    if (!handleParam) {
+      const saved = readLastHandle();
+      if (saved && findMember(saved)) {
+        const p = new URLSearchParams();
+        p.set('member', saved);
+        window.location.replace(`${window.location.pathname}?${p.toString()}`);
+        return; // hard redirect — this code path stops here
+      }
+      if (saved) clearLastHandle(); // saved but no longer in roster
+      showBootPicker('select');
+      return;
+    }
+
+    const member = findMember(handleParam);
+    if (!member) {
+      clearLastHandle();
+      showBootPicker('not_found');
+      return;
+    }
+    resolveViewerFromMember(member);
+    saveLastHandle(member.handle); // remember for next time
+    renderHUD();
+    renderHotspots();
+    hideBootOverlay();
+  }
+
+  init();
 
   // ---------- ambient parallax ----------
   // Tiny mouse-driven tilt — subtle, doesn't disorient.
