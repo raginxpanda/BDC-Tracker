@@ -808,6 +808,39 @@
             .roster-table { font-size: 12px; }
             .stat-grid { grid-template-columns: repeat(2, 1fr); }
             .modal-backdrop { padding: 12px; }
+
+            /* Hero: tighten everything. Desktop letter-spacing wraps the
+               tagline + motto into 3-4 lines on phones; phones get less
+               spacing + smaller type so the hero stays a single screen. */
+            .hero { padding-top: 16px; }
+            .bdc-logo { max-width: 130px; margin-bottom: 12px; }
+            .hero h1 {
+                font-size: clamp(40px, 11vw, 64px);
+                letter-spacing: 0.06em;
+                margin-bottom: 4px;
+                line-height: 0.92;
+            }
+            .hero .tagline {
+                font-size: 10px;
+                letter-spacing: 0.25em;
+                margin-bottom: 10px;
+            }
+            .hero .motto {
+                font-size: 15px;
+                letter-spacing: 0.15em;
+                padding: 0 22px;
+            }
+            .hero .motto::before, .hero .motto::after {
+                font-size: 7px;
+            }
+            .hero .quarters-link {
+                margin-top: 14px;
+                font-size: 10px;
+                letter-spacing: 0.2em;
+                padding: 9px 18px;
+            }
+            /* Status banner doesn't need so much breathing room either. */
+            .status-banner { margin: 18px auto; padding: 20px 22px; }
         }
     </style>
 </head>
@@ -1001,7 +1034,6 @@
         <!-- FOOTER -->
         <footer class="footer">
             <div class="stripes"></div>
-            <div class="footer-motto">MISSION FIRST. SAFETY ALWAYS.</div>
             <div class="footer-meta">BDC ORG TRACKER · V1.2 · POWERED BY CARBON-12</div>
             <div class="footer-sync" id="footer-sync">
                 <span class="sync-dot"></span><span id="sync-text">CONNECTING…</span>
