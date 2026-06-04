@@ -1337,7 +1337,13 @@
 
   function findMemberByDiscordId(discordId) {
     if (!discordId) return null;
-    return (snapshot?.roster ?? []).find((m) => m.discordUserId === discordId) ?? null;
+    // Snapshot serializes the field as `discord_id` (snake_case to match
+    // the underlying column name). Discord IDs are snowflake strings so
+    // == is fine, but we compare as strings to be defensive against
+    // any code path that might coerce one side to a number.
+    return (snapshot?.roster ?? []).find(
+      (m) => String(m.discord_id) === String(discordId),
+    ) ?? null;
   }
 
   // Top-right HUD button: shows SIGN OUT when authed, hidden otherwise
