@@ -363,6 +363,28 @@
       padding: 24px;
     }
     .boot-overlay.hidden { display: none; }
+    .boot-signin-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 28px;
+      background: linear-gradient(180deg, #5865F2 0%, #4752c4 100%);
+      border: 1px solid #5865F2;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.28em;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 18px rgba(88, 101, 242, 0.4);
+    }
+    .boot-signin-btn:hover {
+      background: linear-gradient(180deg, #6a76f3 0%, #5865F2 100%);
+      box-shadow: 0 0 28px rgba(88, 101, 242, 0.7);
+      transform: translateY(-1px);
+    }
     .boot-panel {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -702,10 +724,15 @@
   // ============================================================
 
   // ---------- snapshot + mutable viewer state -----------------------------
-  const SNAPSHOT_URL = 'https://api.blkdiamondcorporation.com/orgs/BDC/snapshot.json';
+  const API_BASE     = 'https://api.blkdiamondcorporation.com';
+  const SNAPSHOT_URL = `${API_BASE}/orgs/BDC/snapshot.json`;
+  const AUTH_ME_URL  = `${API_BASE}/auth/me`;
+  const AUTH_LOGIN   = `${API_BASE}/auth/login`;
+  const AUTH_LOGOUT  = `${API_BASE}/auth/logout`;
 
   let snapshot = null;                  // org snapshot once loaded
-  let viewer = {                        // resolved from ?member= or picker
+  let session  = null;                  // { discordId, username, avatar } if signed in
+  let viewer = {                        // resolved from auth + optional ?member= override
     handle: '—',
     rank: '—',
     rankCode: 'CRM',
@@ -1206,11 +1233,11 @@
     bootOverlay.classList.remove('hidden');
   }
   function showBootPicker(reason) {
-    bootTitle.textContent = 'Select Crew Member';
+    bootTitle.textContent = 'Crew Preview';
     bootMessage.style.display = '';
     bootMessage.textContent = reason === 'not_found'
       ? `Handle not in the roster. Pick from the list below.`
-      : `Type or pick your handle to enter your personal quarters.`;
+      : `Type or pick a handle to preview that member's quarters.`;
     bootPicker.style.display = 'flex';
     bootError.style.display = 'none';
     bootHelp.innerHTML = '<a href="./" style="color:var(--text-dim);text-decoration:none;letter-spacing:0.2em;">← BACK TO TRACKER</a>';
@@ -1221,6 +1248,51 @@
     bootOverlay.classList.remove('hidden');
     setTimeout(() => pickerInput.focus(), 50);
   }
+
+  // Sign-in prompt when no session exists. The Discord OAuth flow handles
+  // the rest — server redirects back to /quarters.html with a cookie set.
+  function showBootSignIn() {
+    bootTitle.textContent = 'Authentication Required';
+    bootMessage.style.display = '';
+    bootMessage.innerHTML =
+      'Personal quarters are restricted to verified BlackDiamond crew. ' +
+      'Sign in with Discord to enter your quarters.';
+    bootPicker.style.display = 'none';
+    bootError.style.display = 'none';
+    bootHelp.innerHTML =
+      `<a href="${AUTH_LOGIN}" class="boot-signin-btn">
+         <span style="font-size:18px;line-height:1;">▸</span>
+         <span>SIGN IN WITH DISCORD</span>
+       </a>
+       <div style="margin-top:14px;font-size:10px;letter-spacing:0.2em;color:var(--text-faint);">
+         <a href="./" style="color:var(--text-faint);text-decoration:none;">← BACK TO TRACKER</a>
+       </div>`;
+    bootOverlay.classList.remove('hidden');
+  }
+
+  // Signed in but the Discord user isn't on the BDC roster — show
+  // verify instructions instead of dumping them into a stranger's room.
+  function showBootNotOnRoster() {
+    bootTitle.textContent = 'Not on the Roster';
+    bootMessage.style.display = '';
+    bootMessage.innerHTML =
+      `Signed in as <strong style="color:var(--bdc-blue);">${session.username}</strong>, ` +
+      'but this Discord account isn\'t verified in BlackDiamond Corporation yet. ' +
+      'Run <code style="color:var(--safety-orange);">/verify start</code> in the BDC Discord ' +
+      'to link your RSI account and gain access.';
+    bootPicker.style.display = 'none';
+    bootError.style.display = 'none';
+    bootHelp.innerHTML =
+      `<button type="button" id="boot-signout" class="boot-signin-btn" style="background:transparent;border:1px solid var(--panel-border);color:var(--text-dim);">
+         <span>SIGN OUT</span>
+       </button>
+       <div style="margin-top:14px;font-size:10px;letter-spacing:0.2em;color:var(--text-faint);">
+         <a href="./" style="color:var(--text-faint);text-decoration:none;">← BACK TO TRACKER</a>
+       </div>`;
+    document.getElementById('boot-signout').addEventListener('click', signOut);
+    bootOverlay.classList.remove('hidden');
+  }
+
   function hideBootOverlay() { bootOverlay.classList.add('hidden'); }
 
   function submitPicker() {
@@ -1233,17 +1305,25 @@
   bootGo.addEventListener('click', submitPicker);
   pickerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitPicker(); });
 
-  // ---------- resolve viewer + boot --------------------------------------
-  const STORAGE_KEY = 'bdc:lastHandle';
+  // ---------- auth + viewer resolution -----------------------------------
 
-  function saveLastHandle(handle) {
-    try { localStorage.setItem(STORAGE_KEY, (handle ?? '').toLowerCase()); } catch (e) { /* private mode etc. */ }
+  async function fetchSession() {
+    try {
+      const res = await fetch(AUTH_ME_URL, { credentials: 'include' });
+      if (res.status === 401) return null;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[auth] /auth/me failed:', err);
+      return null;
+    }
   }
-  function readLastHandle() {
-    try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
-  }
-  function clearLastHandle() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+
+  async function signOut() {
+    try {
+      await fetch(AUTH_LOGOUT, { method: 'POST', credentials: 'include' });
+    } catch (e) { /* best effort */ }
+    window.location.href = window.location.pathname;
   }
 
   function resolveViewerFromMember(member) {
@@ -1255,14 +1335,20 @@
     viewer.isOfficer = isOfficerRank(viewer.rankCode);
   }
 
-  // Switch button — wipes saved handle + reloads to picker
-  document.getElementById('hud-switch').addEventListener('click', () => {
-    clearLastHandle();
-    window.location.href = window.location.pathname;
-  });
+  function findMemberByDiscordId(discordId) {
+    if (!discordId) return null;
+    return (snapshot?.roster ?? []).find((m) => m.discordUserId === discordId) ?? null;
+  }
+
+  // Top-right HUD button: shows SIGN OUT when authed, hidden otherwise
+  const hudSwitchBtn = document.getElementById('hud-switch');
+  hudSwitchBtn.textContent = '⏻ SIGN OUT';
+  hudSwitchBtn.addEventListener('click', signOut);
 
   async function init() {
     showBootLoading();
+
+    // 1. Snapshot (public, no auth needed)
     try {
       const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1273,34 +1359,39 @@
       return;
     }
 
+    // 2. Session
+    session = await fetchSession();
+    if (!session) {
+      hudSwitchBtn.style.display = 'none';
+      showBootSignIn();
+      return;
+    }
+
+    // 3. Resolve member identity
+    //    Priority:
+    //      a) ?member=X URL override — preview anyone's quarters
+    //         (current viewer must still be authed to access at all)
+    //      b) Roster lookup by signed-in Discord ID
     const params = new URLSearchParams(window.location.search);
-    let handleParam = params.get('member');
+    const handleOverride = params.get('member');
 
-    // No URL param? Try the saved handle from a previous visit. If we
-    // have one AND it still resolves, redirect with it in the URL so
-    // the address bar always reflects state. If saved handle is stale
-    // (member left the org), clear it and fall through to the picker.
-    if (!handleParam) {
-      const saved = readLastHandle();
-      if (saved && findMember(saved)) {
-        const p = new URLSearchParams();
-        p.set('member', saved);
-        window.location.replace(`${window.location.pathname}?${p.toString()}`);
-        return; // hard redirect — this code path stops here
+    let member;
+    if (handleOverride) {
+      member = findMember(handleOverride);
+      if (!member) {
+        showBootPicker('not_found');
+        return;
       }
-      if (saved) clearLastHandle(); // saved but no longer in roster
-      showBootPicker('select');
-      return;
+    } else {
+      member = findMemberByDiscordId(session.discordId);
+      if (!member) {
+        // Signed in but not verified in this org — show onboarding path
+        showBootNotOnRoster();
+        return;
+      }
     }
 
-    const member = findMember(handleParam);
-    if (!member) {
-      clearLastHandle();
-      showBootPicker('not_found');
-      return;
-    }
     resolveViewerFromMember(member);
-    saveLastHandle(member.handle); // remember for next time
     renderHUD();
     renderHotspots();
     hideBootOverlay();
