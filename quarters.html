@@ -979,14 +979,77 @@
         <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">BlackDiamond Corporation runs structured operations across Stanton and Pyro. Every member has a role, every operation has a brief, every contribution is logged.</p>`,
     }),
 
-    mission: () => ({
-      tag: '[05] MISSION BOARD',
-      title: 'Open Operations',
-      body: `<div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">ONE CREW</div>
-        <div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:18px;">ONE PURPOSE</div>
-        <div style="padding:20px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;color:var(--text-faint);font-size:11px;letter-spacing:0.2em;">OPEN OPS LISTING — COMING IN PHASE 2.1</div>
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin-top:18px;">Signups happen via <code style="color:var(--bdc-blue);">/event signup</code> in Discord for now.</p>`,
-    }),
+    mission: () => {
+      const events = snapshot?.upcomingEvents ?? [];
+      const now = Date.now();
+
+      // Header tagline stays — it's the BDC vibe statement
+      const header = `<div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">ONE CREW</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:30px;letter-spacing:0.08em;color:var(--text);margin-bottom:22px;">ONE PURPOSE</div>`;
+
+      if (events.length === 0) {
+        return {
+          tag: '[05] MISSION BOARD',
+          title: 'Open Operations',
+          body: header + `<div style="padding:24px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;color:var(--text-faint);font-size:11px;letter-spacing:0.2em;">
+            ▸ NO OPERATIONS ON THE BOARD
+            <div style="margin-top:6px;color:var(--text-dim);font-size:10px;letter-spacing:0.18em;">command will post new ops as they're scheduled</div>
+          </div>`,
+        };
+      }
+
+      const rows = events.map((e) => {
+        const ts = new Date(e.startsAt).getTime();
+        const isLive = e.status === 'live' || (ts <= now && ts > now - 6 * 3600 * 1000);
+        const statusBadge = isLive
+          ? '<span style="padding:3px 8px;background:rgba(232,101,43,0.18);border:1px solid var(--safety-orange);color:var(--safety-orange);font-size:9px;letter-spacing:0.22em;">▸ LIVE</span>'
+          : '<span style="padding:3px 8px;background:rgba(74,158,255,0.12);border:1px solid var(--bdc-blue);color:var(--bdc-blue);font-size:9px;letter-spacing:0.22em;">SCHEDULED</span>';
+
+        // Friendly date/time. Uses local TZ — what the viewer expects to see.
+        const d = new Date(e.startsAt);
+        const dateStr = d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+        const timeStr = d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+
+        // Relative — "in 3h", "in 2d", "live now", "starts soon"
+        const diffMs = ts - now;
+        let relative;
+        if (Math.abs(diffMs) < 30 * 60 * 1000)            relative = 'starts soon';
+        else if (diffMs < 0)                              relative = 'in progress';
+        else if (diffMs < 3600 * 1000)                    relative = `in ${Math.round(diffMs/60000)}m`;
+        else if (diffMs < 86400 * 1000)                   relative = `in ${Math.round(diffMs/3600000)}h`;
+        else                                              relative = `in ${Math.round(diffMs/86400000)}d`;
+
+        const locLine = e.location
+          ? `<div style="font-size:10px;color:var(--text-faint);letter-spacing:0.15em;margin-top:4px;">▸ ${e.location.toUpperCase()}</div>`
+          : '';
+        const notesLine = e.notes
+          ? `<div style="color:var(--text-dim);font-size:11px;line-height:1.5;margin-top:6px;font-style:italic;">${e.notes.length > 140 ? e.notes.slice(0,140)+'…' : e.notes}</div>`
+          : '';
+
+        return `<div style="padding:12px 14px;background:rgba(0,0,0,0.4);border-left:2px solid ${isLive ? 'var(--safety-orange)' : 'var(--bdc-blue)'};margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:0.05em;color:var(--text);">${e.title}</div>
+            ${statusBadge}
+          </div>
+          <div style="display:flex;gap:14px;align-items:baseline;">
+            <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.1em;">${dateStr} · ${timeStr}</div>
+            <div style="font-size:10px;color:var(--safety-orange);letter-spacing:0.18em;">${relative.toUpperCase()}</div>
+          </div>
+          ${locLine}
+          ${notesLine}
+        </div>`;
+      }).join('');
+
+      const footnote = `<p style="color:var(--text-dim);font-size:11px;line-height:1.6;margin-top:18px;">
+        Signups happen via the <span style="color:var(--bdc-blue);">RSVP buttons</span> on the ops board in Discord.
+      </p>`;
+
+      return {
+        tag: '[05] MISSION BOARD',
+        title: `Open Operations · ${events.length}`,
+        body: header + rows + footnote,
+      };
+    },
 
     logbook: () => {
       const m = viewer.member ?? {};
