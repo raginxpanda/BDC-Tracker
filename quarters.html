@@ -106,11 +106,86 @@
     .led-flicker-2 { left: 34%; top: 53%; width: 4%; height: 1%; animation-delay: 1.7s; }
     .led-flicker-3 { left: 7%;  top: 4%;  width: 6%; height: 1%; animation-delay: 3.1s; background: var(--bdc-blue); }
     @keyframes flick {
+      0%, 60%, 100% { opacity: 0.95; }
+      20% { opacity: 0.4; }
+      30% { opacity: 0.85; }
+      45% { opacity: 0.6; }
+      55% { opacity: 0.9; }
+    }
+    @keyframes hotspot-pulse {
       0%, 92%, 100% { opacity: 0; }
       93%           { opacity: 0.65; }
       94%           { opacity: 0; }
       96%           { opacity: 0.4; }
       97%           { opacity: 0; }
+    }
+
+    /* Edit mode (?edit=1) — make hotspots draggable with visible bounds */
+    .hotspot.edit-mode {
+      cursor: move !important;
+      border: 2px solid var(--safety-orange) !important;
+      background: rgba(232, 101, 43, 0.12) !important;
+      box-shadow: 0 0 14px rgba(232, 101, 43, 0.5) !important;
+      transition: none !important;
+    }
+    .hotspot.edit-mode .hotspot-label {
+      opacity: 1 !important;
+      color: var(--safety-orange);
+      font-weight: 700;
+    }
+    .edit-coords {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      background: rgba(0,0,0,0.7);
+      padding: 1px 6px;
+      pointer-events: none;
+    }
+    .resize-handle {
+      position: absolute;
+      bottom: -6px; right: -6px;
+      width: 14px; height: 14px;
+      background: var(--safety-orange);
+      border: 2px solid var(--bg);
+      cursor: se-resize;
+      z-index: 10;
+    }
+    #edit-toolbar {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      z-index: 9999;
+      background: rgba(10, 14, 22, 0.95);
+      border: 1px solid var(--safety-orange);
+      padding: 14px 18px;
+      box-shadow: 0 0 28px rgba(232,101,43,0.4);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #edit-toolbar button {
+      display: block;
+      width: 100%;
+      padding: 8px 14px;
+      background: var(--safety-orange);
+      color: #0a0e16;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #edit-toolbar button:hover { background: #ff7a3d; }
+    #edit-toolbar button#edit-exit {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--panel-border);
+    }
+    #edit-toolbar button#edit-exit:hover {
+      color: var(--text);
+      border-color: var(--text-dim);
     }
 
     /* ============ HOTSPOT LAYER ============ */
@@ -998,13 +1073,46 @@
       };
     },
 
-    notices: () => ({
-      tag: '[04] BULKHEAD POSTER',
-      title: 'BDC Notices',
-      body: `<div style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">BUILT ON DISCIPLINE</div>
-        <div style="font-family:'Rajdhani',sans-serif;font-size:18px;letter-spacing:0.12em;color:var(--bdc-red);margin-bottom:24px;">STRENGTH THROUGH COORDINATION</div>
-        <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">BlackDiamond Corporation runs structured operations across Stanton and Pyro. Every member has a role, every operation has a brief, every contribution is logged.</p>`,
-    }),
+    notices: () => {
+      const items = snapshot?.notices ?? [];
+
+      // Header tagline stays — Cody specifically liked this look
+      const header = `<div style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;">BUILT ON DISCIPLINE</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:18px;letter-spacing:0.12em;color:var(--bdc-red, var(--safety-orange));margin-bottom:24px;">STRENGTH THROUGH COORDINATION</div>`;
+
+      if (items.length === 0) {
+        return {
+          tag: '[04] BULKHEAD POSTER',
+          title: 'BDC Notices',
+          body: header + `<p style="color:var(--text-dim);font-size:13px;line-height:1.7;">BlackDiamond Corporation runs structured operations across Stanton and Pyro. Every member has a role, every operation has a brief, every contribution is logged.</p>
+            <div style="margin-top:22px;padding:14px;background:rgba(0,0,0,0.4);border:1px dashed var(--panel-border);text-align:center;color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">
+              ▸ NO ACTIVE NOTICES
+              <div style="margin-top:5px;color:var(--text-dim);font-size:10px;letter-spacing:0.14em;">officers can post via <span style="color:var(--bdc-blue);">/notices post</span></div>
+            </div>`,
+        };
+      }
+
+      const noticeCards = items.map((n) => {
+        const date = new Date(n.postedAt).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+        const expBadge = n.expiresAt
+          ? `<span style="margin-left:8px;padding:2px 7px;background:rgba(245,158,11,0.12);border:1px solid #f59e0b;color:#f59e0b;font-size:9px;letter-spacing:0.18em;">EXPIRES ${new Date(n.expiresAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>`
+          : '';
+        const body = (n.body ?? '').replace(/\n/g, '<br>');
+        return `<div style="padding:14px 16px;background:rgba(0,0,0,0.4);border-left:3px solid var(--safety-orange);margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:18px;letter-spacing:0.04em;color:var(--text);">${n.title}${expBadge}</div>
+            <div style="font-size:10px;letter-spacing:0.18em;color:var(--text-faint);white-space:nowrap;">${date} · ${n.postedBy}</div>
+          </div>
+          <div style="color:var(--text-dim);font-size:12px;line-height:1.6;">${body}</div>
+        </div>`;
+      }).join('');
+
+      return {
+        tag: '[04] BULKHEAD POSTER',
+        title: `BDC Notices · ${items.length}`,
+        body: header + noticeCards,
+      };
+    },
 
     mission: () => {
       const events = snapshot?.upcomingEvents ?? [];
@@ -1204,13 +1312,19 @@
     document.title = `${viewer.handle} · BDC Quarters`;
   }
 
+  // Edit mode: ?edit=1 lets the viewer drag + resize hotspots to align
+  // them with objects in the room background. Coordinates are updated
+  // live and a floating button copies the complete HOTSPOTS array to
+  // the clipboard so they can be pasted back into the source code.
+  const EDIT_MODE = new URLSearchParams(window.location.search).get('edit') === '1';
+
   function renderHotspots() {
     hotspotLayer.innerHTML = '';
     mobileList.innerHTML = '';
     for (const h of HOTSPOTS) {
       const isLocked = h.locked && !viewer.isOfficer;
       const btn = document.createElement('button');
-      btn.className = 'hotspot' + (isLocked ? ' locked' : '');
+      btn.className = 'hotspot' + (isLocked ? ' locked' : '') + (EDIT_MODE ? ' edit-mode' : '');
       btn.style.left = `${h.x}%`;
       btn.style.top = `${h.y}%`;
       btn.style.width = `${h.w}%`;
@@ -1218,8 +1332,17 @@
       btn.dataset.hotspot = h.id;
       btn.dataset.tone = h.tone;
       btn.setAttribute('aria-label', h.label);
-      btn.innerHTML = `<span class="hotspot-label">${h.label}</span>`;
-      btn.addEventListener('click', () => openHotspot(h.id));
+
+      if (EDIT_MODE) {
+        btn.innerHTML =
+          `<span class="hotspot-label">${h.label}</span>` +
+          `<span class="edit-coords">${h.x},${h.y} · ${h.w}×${h.h}</span>` +
+          `<span class="resize-handle" data-dir="se"></span>`;
+        attachDragResize(btn, h);
+      } else {
+        btn.innerHTML = `<span class="hotspot-label">${h.label}</span>`;
+        btn.addEventListener('click', () => openHotspot(h.id));
+      }
       hotspotLayer.appendChild(btn);
 
       const tile = document.createElement('button');
@@ -1228,6 +1351,86 @@
       tile.addEventListener('click', () => openHotspot(h.id));
       mobileList.appendChild(tile);
     }
+    if (EDIT_MODE) mountEditToolbar();
+  }
+
+  // Drag = move the box. Drag the SE corner handle = resize. Both
+  // operate in % of the stage so coords stay device-independent.
+  function attachDragResize(btn, h) {
+    const stage = document.getElementById('room-stage');
+    let dragMode = null;       // 'move' | 'resize'
+    let startX, startY;
+    let origX, origY, origW, origH;
+
+    btn.addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('resize-handle')) {
+        dragMode = 'resize';
+      } else {
+        dragMode = 'move';
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = stage.getBoundingClientRect();
+      startX = e.clientX;
+      startY = e.clientY;
+      origX = h.x; origY = h.y; origW = h.w; origH = h.h;
+
+      const onMove = (ev) => {
+        const dxPct = ((ev.clientX - startX) / rect.width)  * 100;
+        const dyPct = ((ev.clientY - startY) / rect.height) * 100;
+        if (dragMode === 'move') {
+          h.x = Math.max(0, Math.min(100 - h.w, origX + dxPct));
+          h.y = Math.max(0, Math.min(100 - h.h, origY + dyPct));
+          btn.style.left = `${h.x.toFixed(1)}%`;
+          btn.style.top  = `${h.y.toFixed(1)}%`;
+        } else {
+          h.w = Math.max(2, Math.min(100 - h.x, origW + dxPct));
+          h.h = Math.max(2, Math.min(100 - h.y, origH + dyPct));
+          btn.style.width  = `${h.w.toFixed(1)}%`;
+          btn.style.height = `${h.h.toFixed(1)}%`;
+        }
+        btn.querySelector('.edit-coords').textContent =
+          `${h.x.toFixed(1)},${h.y.toFixed(1)} · ${h.w.toFixed(1)}×${h.h.toFixed(1)}`;
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        dragMode = null;
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  function mountEditToolbar() {
+    if (document.getElementById('edit-toolbar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'edit-toolbar';
+    bar.innerHTML = `
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:8px;">▸ EDIT MODE</div>
+      <button id="edit-copy" type="button">📋 COPY HOTSPOTS ARRAY</button>
+      <button id="edit-exit" type="button" style="margin-top:6px;">EXIT (?edit=1 to re-enter)</button>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-dim);line-height:1.5;">
+        Drag any box to move. Drag the SE corner to resize.
+      </div>`;
+    document.body.appendChild(bar);
+    document.getElementById('edit-copy').addEventListener('click', copyHotspots);
+    document.getElementById('edit-exit').addEventListener('click', () => {
+      window.location.href = window.location.pathname;
+    });
+  }
+
+  function copyHotspots() {
+    const text = 'const HOTSPOTS = [\n' + HOTSPOTS.map((h) => {
+      const lock = h.locked ? ', locked: true' : '';
+      return `  { id: '${h.id}', label: '${h.label}', x: ${h.x.toFixed(1)}, y: ${h.y.toFixed(1)}, w: ${h.w.toFixed(1)}, h: ${h.h.toFixed(1)}, tone: '${h.tone}'${lock} },`;
+    }).join('\n') + '\n];';
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('edit-copy');
+      const orig = btn.textContent;
+      btn.textContent = '✓ COPIED — paste in chat';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    });
   }
 
   // ---------- modal control ----------------------------------------------
