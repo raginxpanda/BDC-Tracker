@@ -307,6 +307,30 @@
       border-color: var(--bdc-blue);
       box-shadow: var(--glow-blue);
     }
+    .hud-freshness {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--text-faint);
+      margin-top: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .logbook-row.clickable:hover > div {
+      background: rgba(74, 158, 255, 0.08) !important;
+    }
+    .logbook-row.clickable:focus { outline: none; }
+    .logbook-row.clickable:focus > div {
+      outline: 1px solid var(--bdc-blue);
+      outline-offset: 1px;
+    }
+    .hud-freshness:hover { color: var(--bdc-blue); }
+    .hud-freshness.stale { color: #f59e0b; }
+    .hud-freshness.refreshing {
+      color: var(--text-dim);
+      pointer-events: none;
+    }
     .hud-switch {
       position: absolute;
       top: 56px; right: 18px;
@@ -737,6 +761,7 @@
   <div class="hud">
     <div class="hud-handle" id="hud-handle">RAGINXPANDA</div>
     <div class="hud-rank" id="hud-rank">▸ FLEET ADMIRAL · BLACKDIAMOND CORP</div>
+    <div class="hud-freshness" id="hud-freshness" title="Click to refresh"></div>
   </div>
   <a class="hud-link" href="./">← TRACKER</a>
   <button class="hud-switch" id="hud-switch" type="button" title="Pick a different crew member">↔ SWITCH</button>
@@ -871,14 +896,14 @@
   // Positions are % of room background. Tune one number per row, no other
   // changes needed. Command Deck is locked unless viewer is an officer.
   const HOTSPOTS = [
-    { id: 'medals',   label: 'MEDAL VAULT',    x: 2,  y: 8,  w: 32, h: 52, tone: 'blue'   },
-    { id: 'notices',  label: 'BDC NOTICES',    x: 32, y: 13, w: 7,  h: 30, tone: 'red'    },
-    { id: 'window',   label: 'CAMPAIGN MAP',   x: 40, y: 10, w: 26, h: 50, tone: 'blue'   },
-    { id: 'mission',  label: 'MISSION BOARD',  x: 67, y: 13, w: 19, h: 27, tone: 'red'    },
-    { id: 'terminal', label: 'PERSONAL STATS', x: 76, y: 35, w: 14, h: 33, tone: 'blue'   },
-    { id: 'logbook',  label: 'CAMPAIGN LOG',   x: 73, y: 80, w: 16, h: 16, tone: 'orange' },
-    { id: 'shelves',  label: 'COLLECTIBLES',   x: 89, y: 10, w: 11, h: 80, tone: 'blue'   },
-    { id: 'command',  label: 'COMMAND DECK',   x: 95, y: 2,  w: 5,  h: 7,  tone: 'red',  locked: true },
+    { id: 'medals',   label: 'MEDAL VAULT',    x: 2.0,  y: 8.0,  w: 26.8, h: 46.9, tone: 'blue'   },
+    { id: 'notices',  label: 'BDC NOTICES',    x: 31.2, y: 16.7, w: 8.4,  h: 28.4, tone: 'red'    },
+    { id: 'window',   label: 'CAMPAIGN MAP',   x: 44.1, y: 11.2, w: 25.6, h: 39.5, tone: 'blue'   },
+    { id: 'mission',  label: 'MISSION BOARD',  x: 72.2, y: 8.3,  w: 16.0, h: 29.4, tone: 'red'    },
+    { id: 'terminal', label: 'PERSONAL STATS', x: 71.8, y: 39.2, w: 12.3, h: 11.5, tone: 'blue'   },
+    { id: 'logbook',  label: 'CAMPAIGN LOG',   x: 72.8, y: 73.9, w: 12.7, h: 22.1, tone: 'orange' },
+    { id: 'shelves',  label: 'COLLECTIBLES',   x: 89.0, y: 7.0,  w: 11.0, h: 53.4, tone: 'blue'   },
+    { id: 'command',  label: 'COMMAND DECK',   x: 95.0, y: 2.0,  w: 5.0,  h: 7.0,  tone: 'red',  locked: true },
   ];
 
   // ---------- modal content builders (using real data) --------------------
@@ -1048,6 +1073,42 @@
         </div>
         <div style="font-size:10px;letter-spacing:0.25em;color:var(--text-faint);margin-top:14px;">▸ AWARDS BY CATEGORY</div>
         <div class="cat-chart">${catBars}</div>`,
+      };
+    },
+
+    // Sub-view: rendered when a Campaign Log entry with an AAR is
+    // clicked. Receives the eventHistory entry directly so we don't
+    // re-query the snapshot.
+    aarDetail: (op) => {
+      const aar = op.aar;
+      const d = new Date(op.startsAt);
+      const dateStr = d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+      const filedDate = new Date(aar.filedAt).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+
+      const section = (label, text, accent) => {
+        if (!text || !String(text).trim()) return '';
+        return `<div style="margin-bottom:18px;">
+          <div style="font-size:10px;letter-spacing:0.25em;color:${accent};margin-bottom:6px;">▸ ${label}</div>
+          <div style="color:var(--text);font-size:12.5px;line-height:1.65;white-space:pre-wrap;">${
+            String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          }</div>
+        </div>`;
+      };
+
+      return {
+        tag: '[06] AFTER-ACTION REPORT',
+        title: op.title,
+        body:
+          `<button data-action="back-to-log" style="background:none;border:1px solid var(--panel-border);color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;padding:5px 12px;cursor:pointer;margin-bottom:18px;">← BACK TO LOG</button>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--panel-border);flex-wrap:wrap;gap:8px;">
+            <div style="font-size:11px;letter-spacing:0.18em;color:var(--text-dim);">▸ OP DATE · ${dateStr}</div>
+            <div style="font-size:10px;letter-spacing:0.18em;color:var(--text-faint);">FILED ${filedDate} BY ${aar.filedBy ?? 'unknown'}</div>
+          </div>` +
+          section('SUMMARY',        aar.summary,      'var(--bdc-blue)') +
+          section('WHAT WENT WELL', aar.wentWell,     '#10b981') +
+          section('COULD IMPROVE',  aar.couldImprove, '#f59e0b') +
+          section('CASUALTIES',     aar.casualties,   'var(--safety-orange)') +
+          section('KEY TAKEAWAYS',  aar.takeaways,    'var(--bdc-blue)'),
       };
     },
 
@@ -1233,13 +1294,23 @@
               : ` <span style="color:#f59e0b;font-size:10px;letter-spacing:0.18em;">⏳ UNPAID</span>`)
           : `<span style="color:var(--text-faint);font-size:11px;">— no payout —</span>`;
 
-        return `<div style="padding:10px 12px;background:rgba(0,0,0,0.35);border-left:2px solid var(--panel-border);margin-bottom:6px;display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;">
-          <div style="font-size:10px;letter-spacing:0.12em;color:var(--text-dim);">${dateStr}</div>
-          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-            ${typeBadge(e.eventType)}
-            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:0.04em;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.title}</div>
+        const hasAar = !!e.aar;
+        const aarBadge = hasAar
+          ? `<div style="font-size:9px;letter-spacing:0.22em;color:var(--bdc-blue);margin-top:3px;text-align:right;">VIEW AAR ▸</div>`
+          : '';
+        const clickAttrs = hasAar
+          ? ` class="logbook-row clickable" data-event-id="${e.eventId}" role="button" tabindex="0" style="cursor:pointer;"`
+          : ' class="logbook-row"';
+
+        return `<div${clickAttrs}>
+          <div style="padding:10px 12px;background:rgba(0,0,0,0.35);border-left:2px solid ${hasAar ? 'var(--bdc-blue)' : 'var(--panel-border)'};margin-bottom:6px;display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;transition:background 0.15s;">
+            <div style="font-size:10px;letter-spacing:0.12em;color:var(--text-dim);">${dateStr}</div>
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              ${typeBadge(e.eventType)}
+              <div style="font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:0.04em;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.title}</div>
+            </div>
+            <div style="font-size:11px;text-align:right;white-space:nowrap;">${payoutCell}${aarBadge}</div>
           </div>
-          <div style="font-size:11px;text-align:right;white-space:nowrap;">${payoutCell}</div>
         </div>`;
       }).join('');
 
@@ -1310,7 +1381,53 @@
     document.getElementById('hud-rank').textContent =
       `${officerMark} ${viewer.rank.toUpperCase()} · BLACKDIAMOND CORP`;
     document.title = `${viewer.handle} · BDC Quarters`;
+    renderFreshness();
   }
+
+  // --- Snapshot freshness indicator ------------------------------------
+  // Members shouldn't have to guess if their data is live or 30min stale.
+  // Show relative time since the snapshot was generated; tinted amber
+  // after 10min as a soft "consider refreshing" cue. Clicking refetches.
+  function fmtRelativeTime(iso) {
+    if (!iso) return 'unknown';
+    const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (secs < 60)    return `${secs}s ago`;
+    if (secs < 3600)  return `${Math.floor(secs / 60)}m ago`;
+    if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+    return `${Math.floor(secs / 86400)}d ago`;
+  }
+  function renderFreshness() {
+    const el = document.getElementById('hud-freshness');
+    if (!el || !snapshot?.lastUpdated) return;
+    const secs = Math.floor((Date.now() - new Date(snapshot.lastUpdated).getTime()) / 1000);
+    el.textContent = `▸ DATA ${fmtRelativeTime(snapshot.lastUpdated).toUpperCase()} · CLICK TO REFRESH`;
+    el.classList.toggle('stale', secs > 600); // amber after 10min
+  }
+  // Tick the relative time once a minute so it stays current without
+  // refetching. Cheap — only updates the text node.
+  setInterval(renderFreshness, 60_000);
+  document.getElementById('hud-freshness').addEventListener('click', async () => {
+    const el = document.getElementById('hud-freshness');
+    el.classList.add('refreshing');
+    el.textContent = '▸ REFRESHING…';
+    try {
+      const res = await fetch(SNAPSHOT_URL, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      snapshot = await res.json();
+      // Re-resolve viewer in case their rank / awards / hangar changed
+      if (viewer.member) {
+        const refreshed = findMemberByDiscordId(session?.discordId)
+          ?? findMember(viewer.member.handle);
+        if (refreshed) resolveViewerFromMember(refreshed);
+      }
+      renderHUD();
+    } catch (err) {
+      console.error('[freshness] refresh failed', err);
+      el.textContent = '▸ REFRESH FAILED · CLICK TO RETRY';
+    } finally {
+      el.classList.remove('refreshing');
+    }
+  });
 
   // Edit mode: ?edit=1 (or ?edit, ?edit=true) lets the viewer drag +
   // resize hotspots to align them with objects in the room background.
@@ -1459,6 +1576,12 @@
       openHotspot('medals');
       return;
     }
+    // Back to campaign log button (from AAR detail)
+    const backLog = e.target.closest('[data-action="back-to-log"]');
+    if (backLog) {
+      openHotspot('logbook');
+      return;
+    }
     // Clicked a medal cell — open its detail view
     const cell = e.target.closest('.medal-cell[data-medal-code]');
     if (cell) {
@@ -1466,6 +1589,18 @@
       const def = (snapshot?.medalDefinitions ?? []).find((d) => d.code === code);
       if (!def) return;
       const content = builders.medalDetail(def);
+      modalTag.textContent = content.tag;
+      modalTitle.textContent = content.title;
+      modalBody.innerHTML = content.body;
+      return;
+    }
+    // Clicked an op row in the Campaign Log that has an AAR
+    const row = e.target.closest('.logbook-row.clickable[data-event-id]');
+    if (row) {
+      const eventId = Number(row.dataset.eventId);
+      const op = (viewer.member?.eventHistory ?? []).find((x) => x.eventId === eventId);
+      if (!op?.aar) return;
+      const content = builders.aarDetail(op);
       modalTag.textContent = content.tag;
       modalTitle.textContent = content.title;
       modalBody.innerHTML = content.body;
@@ -1650,22 +1785,39 @@
     }
 
     // 3. Resolve member identity
+    //    Priority:
+    //      a) ?member=X URL override — only honored when the signed-in
+    //         viewer is an officer (otherwise they could snoop on each
+    //         other's stats). Non-officer override attempts silently
+    //         fall through to their own quarters with a console hint.
+    //      b) Roster lookup by signed-in Discord ID
     const params = new URLSearchParams(window.location.search);
     const handleOverride = params.get('member');
 
+    // Determine if the viewer is an officer before processing override
+    const viewerMember = findMemberByDiscordId(session.discordId);
+    const viewerIsOfficer = viewerMember
+      ? isOfficerRank((viewerMember.rank ?? 'CRM').toUpperCase())
+      : false;
+
     let member;
-    if (handleOverride) {
+    if (handleOverride && viewerIsOfficer) {
       member = findMember(handleOverride);
       if (!member) {
         showBootPicker('not_found');
         return;
       }
     } else {
-      member = findMemberByDiscordId(session.discordId);
-      if (!member) {
+      if (handleOverride && !viewerIsOfficer) {
+        console.warn(
+          `[quarters] ?member=${handleOverride} ignored — preview is officer-only`,
+        );
+      }
+      if (!viewerMember) {
         showBootNotOnRoster();
         return;
       }
+      member = viewerMember;
     }
 
     resolveViewerFromMember(member);
