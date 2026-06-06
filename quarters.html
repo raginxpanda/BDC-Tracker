@@ -317,6 +317,14 @@
       user-select: none;
       transition: color 0.15s;
     }
+    .hud-division {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--safety-orange);
+      text-shadow: 0 0 10px rgba(0,0,0,0.9);
+      margin-top: 2px;
+    }
     .logbook-row.clickable:hover > div {
       background: rgba(74, 158, 255, 0.08) !important;
     }
@@ -831,6 +839,7 @@
   <div class="hud">
     <div class="hud-handle" id="hud-handle">RAGINXPANDA</div>
     <div class="hud-rank" id="hud-rank">▸ FLEET ADMIRAL · BLACKDIAMOND CORP</div>
+    <div class="hud-division" id="hud-division" style="display:none;"></div>
     <div class="hud-freshness" id="hud-freshness" title="Click to refresh"></div>
   </div>
   <a class="hud-link" href="./">← TRACKER</a>
@@ -1450,6 +1459,15 @@
     const officerMark = viewer.isOfficer ? '◆' : '▸';
     document.getElementById('hud-rank').textContent =
       `${officerMark} ${viewer.rank.toUpperCase()} · BLACKDIAMOND CORP`;
+    // Division (if assigned) — shown as a third line under rank
+    const divEl = document.getElementById('hud-division');
+    const div = viewer.member?.division;
+    if (div) {
+      divEl.textContent = `▸ ${div.name.toUpperCase()}`;
+      divEl.style.display = '';
+    } else {
+      divEl.style.display = 'none';
+    }
     document.title = `${viewer.handle} · BDC Quarters`;
     renderFreshness();
   }
