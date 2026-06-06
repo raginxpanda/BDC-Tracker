@@ -1312,11 +1312,13 @@
     document.title = `${viewer.handle} · BDC Quarters`;
   }
 
-  // Edit mode: ?edit=1 lets the viewer drag + resize hotspots to align
-  // them with objects in the room background. Coordinates are updated
-  // live and a floating button copies the complete HOTSPOTS array to
-  // the clipboard so they can be pasted back into the source code.
-  const EDIT_MODE = new URLSearchParams(window.location.search).get('edit') === '1';
+  // Edit mode: ?edit=1 (or ?edit, ?edit=true) lets the viewer drag +
+  // resize hotspots to align them with objects in the room background.
+  // Bypasses the auth flow — it's a layout-tuning tool, not a member
+  // experience. Works even without a session.
+  const _editParam = new URLSearchParams(window.location.search).get('edit');
+  const EDIT_MODE = _editParam !== null && _editParam !== '0' && _editParam !== 'false';
+  if (EDIT_MODE) console.log('[quarters] edit mode active — drag/resize hotspots, then click COPY in the toolbar');
 
   function renderHotspots() {
     hotspotLayer.innerHTML = '';
@@ -1622,6 +1624,23 @@
       return;
     }
 
+    // EDIT MODE: bypass auth entirely. Use a placeholder viewer so the
+    // HUD renders with neutral text, then render hotspots in draggable
+    // mode. This is a layout-tuning tool — it shouldn't require a valid
+    // session or roster membership to work.
+    if (EDIT_MODE) {
+      viewer.handle    = 'EDIT MODE';
+      viewer.rank      = 'LAYOUT EDITOR';
+      viewer.rankCode  = 'CRM';
+      viewer.isOfficer = true; // unlock any officer-only hotspots so all are reachable
+      viewer.member    = { handle: 'EDIT MODE', eventHistory: [], awards: [], hangars: [] };
+      hudSwitchBtn.style.display = 'none';
+      renderHUD();
+      renderHotspots();
+      hideBootOverlay();
+      return;
+    }
+
     // 2. Session
     session = await fetchSession();
     if (!session) {
@@ -1631,10 +1650,6 @@
     }
 
     // 3. Resolve member identity
-    //    Priority:
-    //      a) ?member=X URL override — preview anyone's quarters
-    //         (current viewer must still be authed to access at all)
-    //      b) Roster lookup by signed-in Discord ID
     const params = new URLSearchParams(window.location.search);
     const handleOverride = params.get('member');
 
@@ -1648,7 +1663,6 @@
     } else {
       member = findMemberByDiscordId(session.discordId);
       if (!member) {
-        // Signed in but not verified in this org — show onboarding path
         showBootNotOnRoster();
         return;
       }
