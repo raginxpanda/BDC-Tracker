@@ -61,11 +61,12 @@
         .bdc-frame-right { right: 0; }
         @media (max-width: 1100px) {
             .bdc-frame { display: none; }
+            .container { max-width: 100%; }
         }
         /* Container above the frames so all interactive content is reachable */
         .container { position: relative; z-index: 1; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; z-index: 1; mix-blend-mode: overlay; }
-        .container { position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+        .container { position: relative; z-index: 2; max-width: min(1640px, calc(100vw - 300px)); margin: 0 auto; padding: 0 32px; }
 
         /* HERO */
         .hero { padding: 80px 32px 48px; text-align: center; position: relative; z-index: 2; }
@@ -2235,18 +2236,12 @@
         </div>
     </div>
     <script>
-      // Command Console button: revealed only for viewers the bot confirms have
-      // dashboard access (Admiral / Fleet Admiral per the dashboard allowlist).
       (function () {
         var API = 'https://api.blkdiamondcorporation.com';
         fetch(API + '/dashboard/api/me', { credentials: 'include' })
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) {
-            if (d && d.orgs && d.orgs.length) {
-              var b = document.getElementById('bdc-console-link');
-              if (b) { b.href = API + '/dashboard'; b.style.display = ''; }
-            }
-          }).catch(function () {});
+          .then(function (d) { if (d && d.orgs && d.orgs.length) { var b = document.getElementById('bdc-console-link'); if (b) { b.href = API + '/dashboard'; b.style.display = ''; } } })
+          .catch(function () {});
       })();
     </script>
   </body>
