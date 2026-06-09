@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- BDC Tracker build r44 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Black Diamond Corporation — Org Tracker</title>
@@ -66,7 +67,7 @@
         /* Container above the frames so all interactive content is reachable */
         .container { position: relative; z-index: 1; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; z-index: 1; mix-blend-mode: overlay; }
-        .container { position: relative; z-index: 2; max-width: min(1640px, calc(100vw - 300px)); margin: 0 auto; padding: 0 32px; }
+        .container { position: relative; z-index: 2; max-width: min(1680px, calc(100vw - (100vh * 0.62) - 56px)); margin: 0 auto; padding: 0 32px; }
 
         /* HERO */
         .hero { padding: 80px 32px 48px; text-align: center; position: relative; z-index: 2; }
@@ -232,6 +233,21 @@
         .modal-section { padding: 24px 40px; border-bottom: 1px solid var(--border); }
         .modal-section:last-child { border-bottom: none; }
         .modal-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.3em; color: var(--bdc-blue); margin-bottom: 16px; }
+        /* ---- XP / progression bar (frame art = assets/xp-bar.png) ---- */
+        .xp-block .xp-frame { position: relative; width: 100%; aspect-ratio: 2508 / 627; background: url('assets/xp-bar.png') center / 100% 100% no-repeat; }
+        .xp-block .xp-track { position: absolute; left: 21.25%; right: 5.82%; top: 30.94%; bottom: 30.46%; border-radius: 7px; overflow: hidden; }
+        .xp-block .xp-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: linear-gradient(90deg, #073048, #00ACEE 62%, #8fe6ff); box-shadow: 0 0 16px rgba(0,172,238,0.85), inset 0 1px 0 rgba(255,255,255,0.35); transition: width 0.6s cubic-bezier(0.2,0.8,0.2,1); }
+        .xp-block .xp-fill::after { content: ''; position: absolute; inset: 0; border-radius: 7px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); transform: translateX(-120%); animation: xp-shine 2.8s linear infinite; }
+        @keyframes xp-shine { to { transform: translateX(220%); } }
+        .xp-block .xp-label { position: absolute; left: 21.25%; right: 5.82%; top: 30.94%; bottom: 30.46%; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; pointer-events: none; font-family: 'JetBrains Mono', monospace; }
+        .xp-block .xp-lv { font-weight: 700; font-size: clamp(12px, 2.2vw, 18px); color: #eaf6ff; text-shadow: 0 0 8px #000, 0 1px 2px #000; letter-spacing: 0.04em; }
+        .xp-block .xp-num { font-size: clamp(10px, 1.8vw, 14px); color: #dff1ff; text-shadow: 0 0 8px #000, 0 1px 2px #000; }
+        .xp-block .xp-meta { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; }
+        .xp-block .xp-streak { color: var(--bdc-blue); border: 1px solid var(--bdc-blue); border-radius: 999px; padding: 1px 8px; }
+        /* roster-row level chip + mini fill */
+        .lv-chip { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; color: var(--bdc-blue); border: 1px solid rgba(0,172,238,0.5); border-radius: 2px; padding: 1px 5px; white-space: nowrap; }
+        .xp-mini { display: inline-block; width: 46px; height: 4px; background: rgba(0,172,238,0.12); border-radius: 2px; overflow: hidden; vertical-align: middle; }
+        .xp-mini-fill { display: block; height: 100%; background: linear-gradient(90deg, #0a4a6e, #00ACEE); box-shadow: 0 0 6px rgba(0,172,238,0.6); }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
         .stat-card { background: var(--bg-3); border: 1px solid var(--border); padding: 16px; border-radius: 2px; text-align: center; }
         .stat-card .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--bdc-blue); line-height: 1; margin-bottom: 4px; }
@@ -1219,6 +1235,7 @@
                                 <span class="member-bdc-tag">[BDC]</span>
                                 <span class="handle">${escapeHtml(m.handle)}</span>
                                 ${m.affiliate ? '<span class="aff-badge">AFF</span>' : ''}
+                                ${m.level != null ? `<span class="lv-chip">LV ${m.level}</span><span class="xp-mini"><span class="xp-mini-fill" style="width:${m.maxLevel ? 100 : Math.max(0, Math.min(100, m.levelPct ?? 0))}%"></span></span>` : ''}
                             </div>
                         </td>
                         <td class="last-seen-cell">${escapeHtml(m.memberSince ?? '—')}</td>
@@ -1609,6 +1626,25 @@
                 `;
             }
 
+            // ---- Progression (XP bar) -------------------------------
+            const hasProg = (m.level != null);
+            const lvl = m.level ?? 1;
+            const isMax = !!m.maxLevel;
+            const pct = isMax ? 100 : Math.max(0, Math.min(100, m.levelPct ?? 0));
+            const into = m.levelInto ?? 0, span = m.levelSpan ?? 0;
+            const totXp = m.xp ?? 0, streak = m.streak ?? 0;
+            const xpBlock = hasProg ? `
+                <div class="modal-section xp-block">
+                    <div class="modal-section-title">⚡ Progression</div>
+                    <div class="xp-frame">
+                        <div class="xp-track"><div class="xp-fill" style="width:${pct}%"></div></div>
+                        <div class="xp-label">
+                            <span class="xp-lv">LV ${lvl}${isMax ? ' · MAX' : ''}</span>
+                            <span class="xp-num">${isMax ? totXp.toLocaleString() + ' XP' : into.toLocaleString() + ' / ' + span.toLocaleString() + ' XP'}</span>
+                        </div>
+                    </div>
+                    <div class="xp-meta"><span>${totXp.toLocaleString()} TOTAL XP</span>${streak > 1 ? `<span class="xp-streak">${streak} OP STREAK</span>` : ''}</div>
+                </div>` : '';
             $('member-modal').style.setProperty('--rank-color', rankColorVar);
             $('member-modal-body').innerHTML = `
                 <div class="modal-header">
@@ -1620,6 +1656,7 @@
                         <span class="since">SINCE ${escapeHtml(m.memberSince ?? '—')}</span>
                     </div>
                 </div>
+                ${xpBlock}
                 ${bioBlock ? `<div class="modal-section"><div class="modal-section-title">Profile</div><div style="color:var(--text);line-height:1.6;">${escapeHtml(bioBlock.bio)}</div></div>` : ''}
                 <div class="modal-section">
                     <div class="modal-section-title">Operations · Payouts</div>
