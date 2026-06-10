@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- BDC Tracker build r44 -->
+    <!-- BDC Tracker build r46 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Black Diamond Corporation — Org Tracker</title>
@@ -67,7 +67,16 @@
         /* Container above the frames so all interactive content is reachable */
         .container { position: relative; z-index: 1; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E"); opacity: 0.04; pointer-events: none; z-index: 1; mix-blend-mode: overlay; }
-        .container { position: relative; z-index: 2; max-width: min(1680px, calc(100vw - (100vh * 0.62) - 56px)); margin: 0 auto; padding: 0 32px; }
+        .container { position: relative; z-index: 2; max-width: 1680px; margin: 0 auto; padding: 0 32px; }
+        /* Rail clearance ONLY where the side rails are actually shown (>=1101px).
+           Below that the rails are hidden, so the viewport-height calc must not
+           apply -- on a tall phone it goes negative and collapses the layout. */
+        @media (min-width: 1101px) {
+            .container { max-width: min(1680px, calc(100vw - (100vh * 0.62) - 56px)); }
+        }
+        @media (max-width: 1100px) {
+            .container { max-width: 100%; padding: 0 16px; }
+        }
 
         /* HERO */
         .hero { padding: 80px 32px 48px; text-align: center; position: relative; z-index: 2; }
@@ -248,6 +257,7 @@
         .lv-chip { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; color: var(--bdc-blue); border: 1px solid rgba(0,172,238,0.5); border-radius: 2px; padding: 1px 5px; white-space: nowrap; }
         .xp-mini { display: inline-block; width: 46px; height: 4px; background: rgba(0,172,238,0.12); border-radius: 2px; overflow: hidden; vertical-align: middle; }
         .xp-mini-fill { display: block; height: 100%; background: linear-gradient(90deg, #0a4a6e, #00ACEE); box-shadow: 0 0 6px rgba(0,172,238,0.6); }
+        @media (max-width: 720px) { .xp-mini { display: none; } }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
         .stat-card { background: var(--bg-3); border: 1px solid var(--border); padding: 16px; border-radius: 2px; text-align: center; }
         .stat-card .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--bdc-blue); line-height: 1; margin-bottom: 4px; }
@@ -1603,27 +1613,42 @@
             }
 
             let timelineBlock = '';
-            const promos = m.promotionHistory ?? [];
-            if (promos.length > 0) {
-                const entries = [...promos].reverse().map(p => {
+            {
+                const medalDefByCode = new Map((state.medalDefinitions || []).map((dd) => [dd.code, dd]));
+                const tl = [];
+                for (const p of (m.promotionHistory ?? [])) {
+                    if (!p.date) continue;
                     const kind = classifyRankChange(p);
-                    const when = fmtRelative(p.date);
-                    const note = p.note ? `<span class="t-note">"${escapeHtml(p.note)}"</span>` : '';
-                    return `
-                        <div class="timeline-entry t-${kind.css}">
-                            <span class="t-when">${when}</span>
-                            <span class="t-icon">${kind.icon}</span>
-                            <span class="t-text">${kind.label}</span>
-                            ${note}
+                    tl.push({ date: p.date, css: kind.css, icon: kind.icon, label: kind.label,
+                        note: p.note ? `<span class="t-note">"${escapeHtml(p.note)}"</span>` : '' });
+                }
+                for (const a of (m.awards ?? [])) {
+                    if (!a.awardedAt) continue;
+                    const def = medalDefByCode.get(a.code);
+                    tl.push({ date: a.awardedAt, css: 'award', icon: '\ud83c\udf96\ufe0f', label: 'Earned ' + escapeHtml(def ? def.name : a.code), note: '' });
+                }
+                for (const e of (m.eventHistory ?? [])) {
+                    if (!e.startsAt) continue;
+                    tl.push({ date: e.startsAt, css: 'op', icon: '\ud83d\udccb', label: 'Attended ' + escapeHtml(e.title || 'an op'), note: '' });
+                }
+                tl.sort((x, y) => new Date(y.date) - new Date(x.date));
+                const top = tl.slice(0, 20);
+                if (top.length > 0) {
+                    const entries = top.map((ev) => `
+                        <div class="timeline-entry t-${ev.css}">
+                            <span class="t-when">${fmtRelative(ev.date)}</span>
+                            <span class="t-icon">${ev.icon}</span>
+                            <span class="t-text">${ev.label}</span>
+                            ${ev.note}
+                        </div>
+                    `).join('');
+                    timelineBlock = `
+                        <div class="modal-section">
+                            <div class="modal-section-title">\ud83d\udcc8 Career Timeline</div>
+                            <div class="timeline">${entries}</div>
                         </div>
                     `;
-                }).join('');
-                timelineBlock = `
-                    <div class="modal-section">
-                        <div class="modal-section-title">📈 Rank History</div>
-                        <div class="timeline">${entries}</div>
-                    </div>
-                `;
+                }
             }
 
             // ---- Progression (XP bar) -------------------------------
